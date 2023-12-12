@@ -1,0 +1,20 @@
+import { Route, Routes, Navigate } from "react-router";
+import HomePage from "@/pages/home";
+import MainPage from "@/pages/main";
+import IntroPage from "@/pages/main/intro";
+import RelationPage from "@/pages/main/relation";
+import CityPage from "@/pages/main/city";
+
+export default function ViewRouter() {
+  return (
+    <Routes>
+      <Route path="/main" element={<MainPage />} >
+        <Route index element={<Navigate to="intro" />} />
+        <Route path="intro" element={<IntroPage />} />
+        <Route path="relation" element={<RelationPage />} />
+        <Route path="city" element={<CityPage />} />
+      </Route>
+      <Route path="/*" element={<HomePage />} />
+    </Routes>
+  )
+}
