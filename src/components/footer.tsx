@@ -10,7 +10,7 @@ export const Footer = () => {
 
   const { setLink, isEditing, setIsOpen } = useModal()
 
-  const pages = ['intro', 'relation', 'city'];
+  const pages = ['intro', 'relation', 'mode', 'city'];
 
   const back = () => {
     const currentIndex = pages.indexOf(pathname);

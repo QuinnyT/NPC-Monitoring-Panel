@@ -1,12 +1,13 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useModal } from "@/hooks/use-modal";
-import { Modal } from "@/components/modal";
 import { Separator } from "@/components/ui/separator"
+import { Modal } from "@/components/modal";
 
 const links = [
   { to: "intro", label: "古城诗人简介" },
   { to: "relation", label: "诗人与他人关系" },
+  { to: "mode", label: "选择观测模式" },
   { to: "city", label: "进入城内体验" },
 ]
 
@@ -48,7 +49,7 @@ export const Siderbar = () => {
               <div>{link.label}</div>
             </div>
             {index < links.length - 1 && (
-              <Separator orientation="vertical" className="h-24 ml-3 my-10" />
+              <Separator orientation="vertical" className="h-16 ml-3 my-4" />
             )}
           </div>
         ))}
