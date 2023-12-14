@@ -52,13 +52,15 @@ export const Footer = () => {
       </div>
       <div className="flex gap-x-4">
         <Button onClick={back} variant="outline" className="w-52 h-12 text-base font-semibold">返回上一页</Button>
-        <Button
-          disabled={pathname === 'mode' && mode === ''}
-          onClick={next}
-          className="w-52 h-12 text-base font-semibold"
-        >
-          下一页
-        </Button>
+        {pathname !== 'city' && (
+          <Button
+            disabled={pathname === 'mode' && mode === ''}
+            onClick={next}
+            className="w-52 h-12 text-base font-semibold"
+          >
+            下一页
+          </Button>
+        )}
       </div>
     </div>
   )

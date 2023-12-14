@@ -5,6 +5,7 @@ import IntroPage from "@/pages/main/intro";
 import RelationPage from "@/pages/main/relation";
 import ModePage from "@/pages/main/mode";
 import CityPage from "@/pages/main/city";
+import UEPage from "@/pages/ue";
 
 export default function ViewRouter() {
   return (
@@ -17,6 +18,7 @@ export default function ViewRouter() {
         <Route path="city" element={<CityPage />} />
       </Route>
       <Route path="/*" element={<HomePage />} />
+      <Route path="/ue" element={<UEPage />} />
     </Routes>
   )
 }
