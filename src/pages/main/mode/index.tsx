@@ -14,7 +14,7 @@ export default function ModePage() {
         <p className="text-xl mb-6">流畅游玩模式</p>
         <div
           onClick={() => handleClick('SMOOTH')}
-          className={cn("relative w-[484px] h-[575px] rounded-[40px] bg-no-repeat bg-center bg-cover", mode === 'SMOOTH' && 'border-[3px] border-[#45CEE3]')}
+          className={cn("relative w-[484px] h-[575px] rounded-[45px] bg-no-repeat bg-center bg-cover", mode === 'SMOOTH' && 'outline outline-offset-0 outline-[#45CEE3]')}
           style={{
             backgroundImage: `url("/UI_smooth-mode.png")`
           }}
@@ -26,7 +26,7 @@ export default function ModePage() {
         <p className="text-xl mb-6">深度 UV 模式</p>
         <div
           onClick={() => handleClick('UV')}
-          className={cn("relative w-[484px] h-[575px] rounded-[40px] bg-no-repeat bg-center bg-cover", mode === 'UV' && 'border-[3px] border-[#45CEE3]')}
+          className={cn("relative w-[484px] h-[575px] rounded-[45px] bg-no-repeat bg-center bg-cover", mode === 'UV' && 'outline outline-offset-0 outline-[#45CEE3]')}
           style={{
             backgroundImage: `url("/UI_uv-mode.png")`
           }}

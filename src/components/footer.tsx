@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Modal } from "@/components/modal";
 import { Button } from "@/components/ui/button"
 import { useModal } from "@/hooks/use-modal";
+import { useMode } from "@/hooks/use-mode";
 
 export const Footer = () => {
   const navigate = useNavigate()
@@ -9,6 +10,7 @@ export const Footer = () => {
   const pathname = location.pathname.slice(6)
 
   const { setLink, isEditing, setIsOpen } = useModal()
+  const { mode } = useMode()
 
   const pages = ['intro', 'relation', 'mode', 'city'];
 
@@ -50,7 +52,13 @@ export const Footer = () => {
       </div>
       <div className="flex gap-x-4">
         <Button onClick={back} variant="outline" className="w-52 h-12 text-base font-semibold">返回上一页</Button>
-        <Button onClick={next} className="w-52 h-12 text-base font-semibold">下一页</Button>
+        <Button
+          disabled={pathname === 'mode' && mode === ''}
+          onClick={next}
+          className="w-52 h-12 text-base font-semibold"
+        >
+          下一页
+        </Button>
       </div>
     </div>
   )

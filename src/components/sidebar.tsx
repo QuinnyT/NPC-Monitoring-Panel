@@ -1,8 +1,10 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useModal } from "@/hooks/use-modal";
+import { useMode } from "@/hooks/use-mode";
 import { Separator } from "@/components/ui/separator"
 import { Modal } from "@/components/modal";
+import { useToast } from "@/components/ui/use-toast"
 
 const links = [
   { to: "intro", label: "古城诗人简介" },
@@ -14,13 +16,20 @@ const links = [
 export const Siderbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
-  const { setLink, isEditing, setIsOpen } = useModal()
+  const { toast } = useToast()
+  
+  const { isEditing, setLink, setIsOpen } = useModal()
+  const { mode } = useMode()
 
   const handleNavigate = (to: string) => {
     setLink(to)
     if (isEditing && to !== 'intro') {
       setIsOpen()
+    } else if (to === 'city' && mode === '') {
+      toast({
+        title: "观测模式未选择",
+        description: "请选择你想要的模式再进入体验吧。",
+      })
     } else {
       navigate(to);
     }
