@@ -3,6 +3,7 @@ import HomePage from "@/pages/home";
 import MainPage from "@/pages/main";
 import IntroPage from "@/pages/main/intro";
 import RelationPage from "@/pages/main/relation";
+import ModePage from "@/pages/main/mode";
 import CityPage from "@/pages/main/city";
 
 export default function ViewRouter() {
@@ -12,6 +13,7 @@ export default function ViewRouter() {
         <Route index element={<Navigate to="intro" />} />
         <Route path="intro" element={<IntroPage />} />
         <Route path="relation" element={<RelationPage />} />
+        <Route path="mode" element={<ModePage />} />
         <Route path="city" element={<CityPage />} />
       </Route>
       <Route path="/*" element={<HomePage />} />
