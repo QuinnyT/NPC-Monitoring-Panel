@@ -1,9 +1,5 @@
 import { useState } from 'react'
-import { cn } from '@/lib/utils'
-import { character, categories } from './character'
-import nameList from "./name_idx_dict.json"
-import roleList from './idx_role_dict.json'
-
+import { characterList, categories } from './character'
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from "@/components/ui/scroll-area"
 
@@ -53,34 +49,58 @@ const colors = [
   "#5C8A80",
   "#57778F"
 ]
+
 export default function CardPage() {
-  const [characterArray, setCharacterArray] = useState(character.flat())
+  const [isDisplayAll, setIsDisPlayAll] = useState(true)
+  const [characterArray, setCharacterArray] = useState(characterList.flat())
   const [bgColor, setBgColor] = useState('')
 
-  const getColor = (name: string[]) => {
-    const index = nameList[name[0]]
-    let color = ''
-    categories.some((categorie, i) => {
-      if (roleList[index].includes(categorie)) {
-        console.log(colors[i], i);
-        color = colors[i]
-        return
-      }
-    })
-    return color
+  // 当使用 characterList.flat() 来遍历时可以用以下函数算出背景颜色
+  // const getColor = (name: string[]) => {
+  //   const index = nameList[name[0]]
+  //   let color = ''
+  //   categories.some((categorie, i) => {
+  //     if (roleList[index].includes(categorie)) {
+  //       console.log(colors[i], i);
+  //       color = colors[i]
+  //       return
+  //     }
+  //   })
+  //   return color
+  // }
+
+  const displayAllCards = () => {
+    return characterList.map((character, index) => (
+      <div>
+        <div className='grid grid-cols-4 gap-4 mt-6'>
+          {character.map((c, i) => (
+            <div
+              key={i}
+              className='flex flex-col gap-y-4 w-[400px] p-3 rounded-xl'
+              style={{
+                backgroundColor: `${colors[index]}`
+              }}
+            >
+              <div className='flex items-center gap-x-2'>
+                <Avatar>
+                  <AvatarImage src={`./UI_head1.png`} />
+                </Avatar>
+                <p className='text-xl'>{Object.keys(c)}</p>
+              </div>
+              <ScrollArea className='h-12 text-sm leading-6 overflow-auto'>{Object.values(c)}</ScrollArea>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))
   }
 
   return (
     <div className='min-h-screen p-4 bg-zinc-300 text-slate-200'>
       <div className='grid grid-cols-8 gap-4 w-full'>
         <button
-          onClick={() => {
-            setCharacterArray(character.flat())
-            setBgColor('')
-          }}
-          className={cn(
-            `flex items-center text-md md:px-4 md:py-3 rounded-md bg-slate-400 hover:opacity-75 transition`
-          )}
+          onClick={() => setIsDisPlayAll(true)}
+          className="flex items-center text-md md:px-4 md:py-3 rounded-md bg-slate-400 hover:opacity-75 transition"
         >
           all
         </button>
@@ -88,7 +108,8 @@ export default function CardPage() {
           categories.map((category, index) => (
             <button
               onClick={() => {
-                setCharacterArray(character[index])
+                setIsDisPlayAll(false)
+                setCharacterArray(characterList[index])
                 setBgColor(colors[index])
               }}
               className="flex items-center text-md md:px-4 md:py-3 rounded-md hover:opacity-75 transition"
@@ -101,26 +122,28 @@ export default function CardPage() {
           ))
         }
       </div>
-      <div className='grid grid-cols-4 gap-4 mt-10'>
-        {characterArray.map((c, i) => (
-          <div
-            key={i}
-            className='flex flex-col gap-y-4 w-[400px] p-3 rounded-xl'
-            style={{
-              backgroundColor: `${bgColor !== '' ? bgColor : getColor(Object.keys(c))}`
-            }}
-            onClick={() => { getColor(Object.keys(c)) }}
-          >
-            <div className='flex items-center gap-x-2'>
-              <Avatar>
-                <AvatarImage src={`./UI_head1.png`} />
-              </Avatar>
-              <p className='text-xl'>{Object.keys(c)}</p>
+      {isDisplayAll ?
+        displayAllCards() :
+        <div className='grid grid-cols-4 gap-4 mt-6'>
+          {characterArray.map((c, i) => (
+            <div
+              key={i}
+              className='flex flex-col gap-y-4 w-[400px] p-3 rounded-xl'
+              style={{
+                backgroundColor: `${bgColor}`
+              }}
+            >
+              <div className='flex items-center gap-x-2'>
+                <Avatar>
+                  <AvatarImage src={`./UI_head1.png`} />
+                </Avatar>
+                <p className='text-xl'>{Object.keys(c)}</p>
+              </div>
+              <ScrollArea className='h-12 text-sm leading-6 overflow-auto'>{Object.values(c)}</ScrollArea>
             </div>
-            <ScrollArea className='h-12 text-sm leading-6 overflow-auto'>{Object.values(c)}</ScrollArea>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      }
     </div>
   )
 }

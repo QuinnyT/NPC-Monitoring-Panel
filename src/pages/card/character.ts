@@ -45,7 +45,7 @@ export const categories = [
 	"passerby",
 ];
 
-export const character = [
+export const characterList = [
 	[
 		{
 			user: ["精明圆滑，善于观察周围环境并据此作出决策的人。"],
