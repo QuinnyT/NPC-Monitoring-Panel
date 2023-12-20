@@ -31,13 +31,15 @@ export default function RelationPage() {
                   }}
                 >
                   <div className="relative" style={{ rotate: `-${index * (360 / length)}deg` }}>
-                    <p className="absolute top-14 mx-auto text-center whitespace-nowrap">{data.name}</p>
                     <Avatar className="w-14 h-14 border-4 border-white" >
                       <AvatarImage src={data.avatar} />
                     </Avatar>
+                    <p className="mt-1 text-center whitespace-nowrap">{data.name}</p>
                   </div>
-                  <Separator orientation="vertical" className="h-32">
-                    {data.relationship}
+                  <Separator orientation="vertical" className="relative h-32">
+                    <div className="absolute left-2" style={{ rotate: (index * (360 / length) > 90 && index * (360 / length) < 270) ? '180deg' : '' }}>
+                      {data.relationship}
+                    </div>
                   </Separator>
                 </div>
               </DialogTrigger>
@@ -74,7 +76,7 @@ export default function RelationPage() {
             </Dialog>
           ))
         }
-        <div className="absolute top-[10.5rem] z-10 flex flex-col justify-center items-center">
+        <div className="absolute top-[12rem] z-10 flex flex-col justify-center items-center">
           <Avatar className="w-14 h-14 border-4 border-white" >
             <AvatarImage src={character.avatar} />
           </Avatar>
