@@ -43,7 +43,7 @@ export const Sheet = () => {
 
   return (
     <div
-      className="absolute top-0 right-0 h-full flex items-center rounded-r-2xl overflow-x-hidden bg-white/10 backdrop-blur transition-all ease-in-out"
+      className="absolute top-0 right-0 z-50 h-full flex items-center rounded-r-2xl overflow-x-hidden bg-white/10 backdrop-blur transition-all ease-in-out"
       style={{
         width: isDisplay ? '35vw' : '3vw',
         transitionDuration: isDisplay ? "700ms" : "600ms",
