@@ -11,6 +11,7 @@ import {
   Application,
   PixelStreamingApplicationStyle
 } from '@epicgames-ps/lib-pixelstreamingfrontend-ui-ue5.3';
+import { Sheet } from './sheet';
 
 export const PixelStreamingApplicationStyles =
   new PixelStreamingApplicationStyle();
@@ -59,7 +60,7 @@ export const PixelStreamingWrapper = ({
   //       }
   //     };
   //   }
-  // }, [videoParent.current]);
+  // }, []);
 
   useEffect(() => {
     if (videoParent.current) {
@@ -77,6 +78,9 @@ export const PixelStreamingWrapper = ({
           PixelStreamingApplicationStyles.setColorMode(isLightMode)
       });
 
+      console.log(application.rootElement);
+
+
       videoParent.current.appendChild(application.rootElement);
 
       // register a playStreamRejected handler to show Click to play overlay if needed:
@@ -93,14 +97,16 @@ export const PixelStreamingWrapper = ({
         } catch { /* empty */ }
       };
     }
-  }, [videoParent.current]);
+  }, [initialSettings]);
 
   return (
     <div className='relative w-full h-full'>
       <div
-        className='w-full h-full'
+        className='relative w-full h-full'
         ref={videoParent}
-      />
+      >
+        <Sheet />
+      </div>
       {/* {clickToPlayVisible && (
         <div
           className='absolute top-0 left-0 w-full h-full flex justify-center items-center cursor-pointer'

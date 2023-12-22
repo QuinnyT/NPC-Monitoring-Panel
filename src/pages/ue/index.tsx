@@ -13,13 +13,13 @@ export default function UEPage() {
           initialSettings={{
             AutoPlayVideo: true,
             AutoConnect: true,
-            ss: "ws://localhost:80",
+            ss: "ws://10.225.0.120:80",
             StartVideoMuted: true,
             HoveringMouse: true,
             WaitForStreamer: true,
           }}
         />
-        <Sheet></Sheet>
+        {/* <Sheet></Sheet> */}
       </div>
       <Button className="w-44 h-14 text-lg font-semibold">返回首页</Button>
     </div>
