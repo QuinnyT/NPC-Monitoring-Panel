@@ -9,7 +9,8 @@ import {
 
 import {
   Application,
-  PixelStreamingApplicationStyle
+  PixelStreamingApplicationStyle,
+  UIElementCreationMode
 } from '@epicgames-ps/lib-pixelstreamingfrontend-ui-ue5.3';
 import { Sheet } from './sheet';
 
@@ -75,11 +76,16 @@ export const PixelStreamingWrapper = ({
       const application = new Application({
         stream: streaming,
         onColorModeChanged: (isLightMode) =>
-          PixelStreamingApplicationStyles.setColorMode(isLightMode)
+          PixelStreamingApplicationStyles.setColorMode(isLightMode),
+        settingsPanelConfig: {
+          isEnabled: false,
+          visibilityButtonConfig: { creationMode: UIElementCreationMode.Disable }
+        },
+        statsPanelConfig: {
+          isEnabled: false,
+          visibilityButtonConfig: { creationMode: UIElementCreationMode.Disable }
+        }
       });
-
-      console.log(application.rootElement);
-
 
       videoParent.current.appendChild(application.rootElement);
 
@@ -100,14 +106,13 @@ export const PixelStreamingWrapper = ({
   }, [initialSettings]);
 
   return (
-    <div className='relative w-full h-full'>
-      <div
-        className='relative w-full h-full'
-        ref={videoParent}
-      >
-        <Sheet />
-      </div>
-      {/* {clickToPlayVisible && (
+    <div
+      className='relative w-full h-full'
+      ref={videoParent}
+    >
+      <Sheet />
+    </div>
+    /* {clickToPlayVisible && (
         <div
           className='absolute top-0 left-0 w-full h-full flex justify-center items-center cursor-pointer'
           onClick={() => {
@@ -117,7 +122,6 @@ export const PixelStreamingWrapper = ({
         >
           <div>Click to play</div>
         </div>
-      )} */}
-    </div>
+    )} */
   );
 };

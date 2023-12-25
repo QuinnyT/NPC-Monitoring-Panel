@@ -51,11 +51,11 @@ export const Sheet = () => {
       }}
     >
       <Button onClick={() => setIsDisplay(!isDisplay)} variant="ghost" className="hover:bg-transparent">
-        <ChevronLeft className="transition-all duration-500" style={{ rotate: isDisplay ? '180deg' : '' }} />
+        <ChevronLeft className="transition-all duration-500 text-white" style={{ rotate: isDisplay ? '180deg' : '' }} />
       </Button>
       {
         isDisplay && (
-          <div className="flex flex-col">
+          <div className="flex flex-col text-white">
             <div className="w-64 px-3 py-1 mb-5 text-lg font-semibold bg-gradient-to-r from-[#3B3630]/30 to-[#5E5840]/30">CURRENT AGENT INFO</div>
             <div className="w-[30vw] h-[30vh] p-2 bg-[#1F1F1F]">
               <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">李 白</div>
