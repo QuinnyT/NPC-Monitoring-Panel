@@ -1,12 +1,21 @@
-import { ChevronLeft, Heart, Award, Users2, ShieldCheck, BadgeJapaneseYen, LucideIcon } from "lucide-react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { useState } from "react"
+import { ChevronLeft, Heart, Award, Users2, ShieldCheck, BadgeJapaneseYen, LucideIcon } from "lucide-react"
+import { api } from "@/lib/api"
 
 type Info = {
   label: string,
   icon: LucideIcon,
   value: number
+}
+type Value = {
+  Survival: number;
+  Belonging: number;
+  Social: number;
+  Intimacy: number;
+  Honor: number;
+  [key: string]: number;
 }
 
 const infos: Info[] = [
@@ -40,6 +49,18 @@ const infos: Info[] = [
 
 export const Sheet = () => {
   const [isDisplay, setIsDisplay] = useState(false)
+  const [attrValues, setAttrValues] = useState<Value>({
+    "Honor": 0,
+    "Intimacy": 0,
+    "Social": 10,
+    "Belonging": 30,
+    "Survival": 30,
+  })
+
+  useEffect(() => {
+    setAttrValues(api().attr_value)
+  }, [])
+
 
   return (
     <div
@@ -66,8 +87,8 @@ export const Sheet = () => {
                       <info.icon className="w-8 h-8" />
                       <span className="text-lg font-semibold">{info.label}</span>
                     </div>
-                    <Progress value={info.value} />
-                    <span className=" w-6 text-lg font-semibold">{info.value}</span>
+                    <Progress value={attrValues[info.label]} />
+                    <span className=" w-6 text-lg font-semibold">{attrValues[info.label]}</span>
                   </div>
                 ))}
               </div>
@@ -80,3 +101,5 @@ export const Sheet = () => {
     </div>
   )
 }
+
+
