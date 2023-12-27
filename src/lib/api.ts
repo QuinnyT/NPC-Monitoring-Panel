@@ -9,6 +9,6 @@ export const api = () => {
 			Intimacy: 40,
 			Honor: 50,
 		},
-		uv: 70,
+		uv: 380,
 	};
 };

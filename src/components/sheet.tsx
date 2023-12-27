@@ -57,10 +57,22 @@ export const Sheet = () => {
     "Survival": 30,
   })
 
+  const [uv, setUV] = useState(60)
+  const color = [
+    "#bfa280",
+    "#ada18a",
+    "#9ba194",
+    "#88a09e",
+    "#769fa8",
+  ]
+
+  const data = api()
   useEffect(() => {
-    setAttrValues(api().attr_value)
+    setAttrValues(data.attr_value)
+    setUV(data.uv)
   }, [])
 
+  let index = Math.min(Math.floor(uv / 100), color.length - 1)
 
   return (
     <div
@@ -94,7 +106,30 @@ export const Sheet = () => {
               </div>
             </div>
             <div className="w-52 px-3 py-1 my-5 text-lg font-semibold bg-gradient-to-r from-[#3B3630]/30 to-[#5E5840]/30">UV ANALYSIS</div>
-            <div className="w-[30vw] h-[30vh] bg-[#1F1F1F]"></div>
+            <div className="flex items-center w-[30vw] h-[32vh] bg-[#1F1F1F]">
+              <div className="flex flex-col items-center">
+                <p className="text-sm indent-3 tracking-wider">Social Conformity</p>
+                <span>U</span>
+                <div className="relative bg-gradient-to-b from-[#BFA280] to-[#769FA8] w-2 h-36">
+                  <div
+                    className="absolute bg-transparent left-[50%] translate-x-[-50%] w-6 h-3 border-2 border-white rounded-[50%]"
+                    style={{
+                      top: `${(uv - 10) / 500 * 8.5}rem`,
+                      backgroundColor: color[index]
+                    }}
+                  >
+                    <p
+                      className="absolute -top-[11px] left-7 text-lg font-semibold"
+                      style={{ color: color[index] }}
+                    >
+                      U&gt;V
+                    </p>
+                  </div>
+                </div>
+                <span>V</span>
+                <p className="text-sm indent-3 tracking-wider">Individual Integrity</p>
+              </div>
+            </div>
           </div>
         )
       }
