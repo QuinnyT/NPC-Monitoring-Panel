@@ -100,10 +100,11 @@ export const PixelStreamingWrapper = ({
       return () => {
         try {
           streaming.disconnect();
+          videoParent.current!.removeChild(application.rootElement);
         } catch { /* empty */ }
       };
     }
-  }, [initialSettings]);
+  }, []);
 
   return (
     <div
