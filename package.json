@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@antv/g2": "^5.1.13",
     "@epicgames-ps/lib-pixelstreamingfrontend-ue5.3": "^1.0.1",
     "@epicgames-ps/lib-pixelstreamingfrontend-ui-ue5.3": "^1.0.1",
     "@radix-ui/react-alert-dialog": "^1.0.5",
