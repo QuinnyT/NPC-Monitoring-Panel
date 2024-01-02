@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { ChevronLeft, Heart, Award, Users2, ShieldCheck, BadgeJapaneseYen, LucideIcon } from "lucide-react"
 import { api } from "@/lib/api"
-import { Chart, register } from '@antv/g2';
+import { Chart } from '@antv/g2';
 
 type Info = {
   label: string,
@@ -157,7 +157,7 @@ export const Sheet = () => {
     return () => {
       chart.destroy()
     }
-  }, [graph_container.current, gameInfo])
+  })
 
   let index = useRef(Math.min(Math.floor(uv / 100), color.current.length - 1))
 
@@ -218,7 +218,7 @@ export const Sheet = () => {
               </div>
               <div className="flex flex-col items-center relative">
                 <p className="text-xl absolute -top-2">UV Energy</p>
-                <div ref={graph_container}></div>
+                <div ref={graph_container} id="graph_container"></div>
               </div>
             </div>
           </div>
