@@ -11,7 +11,7 @@ export default function UEPage() {
         <PixelStreamingWrapper
           initialSettings={{
             AutoPlayVideo: true,
-            AutoConnect: true,
+            AutoConnect: false,
             ss: "ws://10.225.0.120:80",
             StartVideoMuted: true,
             HoveringMouse: true,
