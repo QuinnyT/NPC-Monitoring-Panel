@@ -157,7 +157,7 @@ export const Sheet = () => {
     return () => {
       chart.destroy()
     }
-  })
+  }, [isDisplay])
 
   let index = useRef(Math.min(Math.floor(uv / 100), color.current.length - 1))
 
