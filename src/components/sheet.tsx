@@ -59,15 +59,18 @@ export const Sheet = () => {
     "Survival": 30,
   })
 
-  const [uv, setUV] = useState(60)
-  const [gameInfo, setGameInfo] = useState<any>()
-  const color = useRef<string[]>([
+  const UV = useRef<number>(0)
+  const color = [
     "#bfa280",
     "#ada18a",
     "#9ba194",
     "#88a09e",
     "#769fa8",
-  ])
+  ]
+  let index = Math.min(Math.floor(UV.current / 100), color.length - 1)
+
+  // todo migrate to zustand state
+  const gameInfo = useRef<{ day: number; time: string; frame: number; uv: number; }[]>()
   const graph_container = useRef<any>(null)
   const graph = useRef<any>()
   const graph_color = useRef<string[]>(['#bababa', '#d2c7a3', '#a3c9d2'])
@@ -75,18 +78,18 @@ export const Sheet = () => {
   const fetchApi = useCallback(async () => {
     const data = await api();
     setAttrValues(data.attr_value)
-    setUV(data.uv)
-    setGameInfo(data.game_info)
+    UV.current = data.uv
+    gameInfo.current = data.game_info
   }, [])
 
   useEffect(() => {
     fetchApi()
-  }, [])
+  }, [fetchApi])
 
   useEffect(() => {
     /**
- * A recreation of this demo: https://observablehq.com/@d3/radial-stacked-bar-chart
- */
+    * A recreation of this demo: https://observablehq.com/@d3/radial-stacked-bar-chart
+    */
     if (!graph_container.current) return
 
     // // 定义图形组件
@@ -125,7 +128,7 @@ export const Sheet = () => {
       .interval()
       .transform({ type: 'groupX' })
       .data({
-        value: gameInfo,
+        value: gameInfo.current,
       })
       .encode('x', 'frame')
       .encode('y', 'uv')
@@ -138,16 +141,14 @@ export const Sheet = () => {
       .style('fill', (datum: any) => {
         const { uv } = datum
         const val = uv * 1
-        if (val > 0 && val < 33.3) {
+        if (val > 0 && val < 30) {
           return graph_color.current[0];
-        } else if (val > 33.3 && val < 66.7) {
+        } else if (val > 30 && val < 130) {
           return graph_color.current[1];
         } else {
           return graph_color.current[2];
         }
-
-
-      });
+      })
     // .tooltip(false)
     // .animate('enter', { type: 'waveIn' })
     // .tooltip({ channel: 'y', valueFormatter: '~s' });
@@ -158,8 +159,6 @@ export const Sheet = () => {
       chart.destroy()
     }
   }, [isDisplay])
-
-  let index = useRef(Math.min(Math.floor(uv / 100), color.current.length - 1))
 
   return (
     <div
@@ -201,13 +200,13 @@ export const Sheet = () => {
                   <div
                     className="absolute bg-transparent left-[50%] translate-x-[-50%] w-6 h-3 border-2 border-white rounded-[50%]"
                     style={{
-                      top: `${(uv - 10) / 500 * 8.5}rem`,
-                      backgroundColor: color.current[index.current]
+                      top: `${(UV.current - 10) / 500 * 8.5}rem`,
+                      backgroundColor: color[index]
                     }}
                   >
                     <p
                       className="absolute -top-[11px] left-7 text-lg font-semibold"
-                      style={{ color: color.current[index.current] }}
+                      style={{ color: color[index] }}
                     >
                       U&gt;V
                     </p>
@@ -227,5 +226,3 @@ export const Sheet = () => {
     </div>
   )
 }
-
-

@@ -7,7 +7,7 @@ export const useRedisClient = () => {
 
 	useEffect(() => {
 		const redisClient = redis.createClient({
-			url: "redis://:123456@192.168.16.86:40009",
+			url: "redis://:123456@192.168.16.74:6379",
 		});
 		redisClient.connect();
 

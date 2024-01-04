@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 export default function UEPage() {
   return (
     <div className="h-screen flex flex-col justify-center items-center gap-y-3 p-1 bg-black overflow-hidden">
-      <div className="text-white text-2xl font-semibold">
+      {/* <div className="text-white text-2xl font-semibold">
         点击esc退出实景操控
-      </div>
+      </div> */}
       <div className="relative w-[85vw] h-[85vh] rounded-2xl bg-no-repeat bg-center bg-cover">
         <PixelStreamingWrapper
           initialSettings={{
