@@ -1,7 +1,11 @@
 import { PixelStreamingWrapper } from "@/components/pixel-streaming-wrapper";
 import { Button } from "@/components/ui/button";
+import axios from "axios";
 
 export default function UEPage() {
+  axios.get('http://localhost:3000/1').then(res => {
+    console.log(res);
+  })
   return (
     <div className="h-screen flex flex-col justify-center items-center gap-y-3 p-1 bg-black overflow-hidden">
       {/* <div className="text-white text-2xl font-semibold">
