@@ -10,8 +10,8 @@ const redisClient = redis.createClient({
 });
 await redisClient.connect();
 
-app.use("/", router);
 app.use(cors());
+app.use("/", router);
 
 app.get("/:key", async (req, res) => {
 	const key = req.params.key;
