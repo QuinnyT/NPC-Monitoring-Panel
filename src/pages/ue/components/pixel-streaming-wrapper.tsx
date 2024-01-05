@@ -13,6 +13,7 @@ import {
   UIElementCreationMode
 } from '@epicgames-ps/lib-pixelstreamingfrontend-ui-ue5.3';
 import { Sheet } from './sheet';
+import { useApi } from '@/hooks/use-api';
 
 export const PixelStreamingApplicationStyles =
   new PixelStreamingApplicationStyle();
@@ -26,6 +27,9 @@ export interface PixelStreamingWrapperProps {
 export const PixelStreamingWrapper = ({
   initialSettings
 }: PixelStreamingWrapperProps) => {
+
+  useApi()
+
   // A reference to parent div element that the Pixel Streaming library attaches into:
   const videoParent = useRef<HTMLDivElement>(null);
 
@@ -77,10 +81,10 @@ export const PixelStreamingWrapper = ({
         stream: streaming,
         onColorModeChanged: (isLightMode) =>
           PixelStreamingApplicationStyles.setColorMode(isLightMode),
-        settingsPanelConfig: {
-          isEnabled: false,
-          visibilityButtonConfig: { creationMode: UIElementCreationMode.Disable }
-        },
+        // settingsPanelConfig: {
+        //   isEnabled: false,
+        //   visibilityButtonConfig: { creationMode: UIElementCreationMode.Disable }
+        // },
         statsPanelConfig: {
           isEnabled: false,
           visibilityButtonConfig: { creationMode: UIElementCreationMode.Disable }

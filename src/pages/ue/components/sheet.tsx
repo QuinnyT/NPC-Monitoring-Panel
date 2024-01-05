@@ -1,22 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useApi } from "@/hooks/use-api"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { ChevronLeft, Heart, Award, Users2, ShieldCheck, BadgeJapaneseYen, LucideIcon } from "lucide-react"
-import { api } from "@/lib/api"
 import { Chart } from '@antv/g2';
+import { api } from "@/lib/api"
+import { AttrValue, useRedis } from "@/hooks/use-redis"
+import { RoseGraph } from "./rose-graph"
 
 type Info = {
   label: string,
   icon: LucideIcon,
   value: number
-}
-type Value = {
-  Survival: number;
-  Belonging: number;
-  Social: number;
-  Intimacy: number;
-  Honor: number;
-  [key: string]: number;
 }
 
 
@@ -50,14 +45,10 @@ const infos: Info[] = [
 ]
 
 export const Sheet = () => {
+  const { redisData } = useRedis()
+  console.log('zustand', redisData);
   const [isDisplay, setIsDisplay] = useState(false)
-  const [attrValues, setAttrValues] = useState<Value>({
-    "Honor": 0,
-    "Intimacy": 0,
-    "Social": 10,
-    "Belonging": 30,
-    "Survival": 30,
-  })
+  const attrValues = useRef<AttrValue>()
 
   const UV = useRef<number>(0)
   const color = [
@@ -77,7 +68,7 @@ export const Sheet = () => {
 
   const fetchApi = useCallback(async () => {
     const data = await api();
-    setAttrValues(data.attr_value)
+    attrValues.current = data.attr_value
     UV.current = data.uv
     gameInfo.current = data.game_info
   }, [])
@@ -87,32 +78,9 @@ export const Sheet = () => {
   }, [fetchApi])
 
   useEffect(() => {
-    /**
-    * A recreation of this demo: https://observablehq.com/@d3/radial-stacked-bar-chart
-    */
+
     if (!graph_container.current) return
 
-    // // 定义图形组件
-    // function ShapeTriangle(style, context) {
-    //   const { document } = context;
-    //   return (P, value, defaults) => {
-    //     console.log(style, P, value, defaults);
-    //     // "M 45.0853 68.0541 L 0.88125 18.7796 L 2.28391 16.1926 C 9.09967 3.62205 23.9577 -2.23967 37.5203 2.29135 L 45.0853 68.0541 Z"
-    //     let [p0, p1, p2, p3] = P;
-    //     const path = document.createElement('path', {
-    //       style: {
-    //         ...style
-    //       }
-    //     }) as HTMLElement
-
-    //     path.setAttribute('d', `M${p2[0]} ${p2[1]} L${p0[0]} ${p0[1]} A${p0[0]} ${p0[1]} ${p1[0]} ${p1[1]} L${p2[0]} ${p2[1]} z`)
-    //     console.log(path)
-    //     return path;
-    //   };
-    // }
-
-    // // 注册该三角形
-    // register('shape.interval.triangle', ShapeTriangle);
 
     const chart = new Chart({
       container: graph_container.current,
@@ -149,9 +117,6 @@ export const Sheet = () => {
           return graph_color.current[2];
         }
       })
-    // .tooltip(false)
-    // .animate('enter', { type: 'waveIn' })
-    // .tooltip({ channel: 'y', valueFormatter: '~s' });
 
     chart.render();
 
@@ -185,8 +150,8 @@ export const Sheet = () => {
                       <info.icon className="w-8 h-8" />
                       <span className="text-lg font-semibold">{info.label}</span>
                     </div>
-                    <Progress value={attrValues[info.label]} />
-                    <span className=" w-6 text-lg font-semibold">{attrValues[info.label]}</span>
+                    <Progress value={attrValues.current![info.label]} />
+                    <span className=" w-6 text-lg font-semibold">{attrValues.current![info.label]}</span>
                   </div>
                 ))}
               </div>
@@ -217,7 +182,8 @@ export const Sheet = () => {
               </div>
               <div className="flex flex-col items-center relative">
                 <p className="text-xl absolute -top-2">UV Energy</p>
-                <div ref={graph_container} id="graph_container"></div>
+                {/* <div ref={graph_container} id="graph_container"></div> */}
+                <RoseGraph isDisplay />
               </div>
             </div>
           </div>

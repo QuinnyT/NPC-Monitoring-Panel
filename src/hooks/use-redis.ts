@@ -1,11 +1,32 @@
 import { create } from "zustand";
 
+export type AttrValue = {
+	Survival: number;
+	Belonging: number;
+	Social: number;
+	Intimacy: number;
+	Honor: number;
+	[key: string]: number;
+};
+
+export type RedisData = {
+	name: string;
+	game_info: {
+		day: number;
+		time: string;
+		frame: number;
+	};
+	attr_value: AttrValue;
+	uv_bar: number;
+	uv_rose: number;
+};
+
 interface useRedisStore {
-	data: any;
-	setData: (data: any) => void;
+	redisData: RedisData[];
+	setRedisData: (data: RedisData[]) => void;
 }
 
 export const useRedis = create<useRedisStore>((set) => ({
-	data: [],
-	setData: (data) => set(() => ({ data })),
+	redisData: [],
+	setRedisData: (redisData) => set(() => ({ redisData })),
 }));
