@@ -7,15 +7,13 @@ export const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
 
 
   // todo migrate to zustand state
-  const rose = useRef<number[]>([])
+  const rose = useRef<any[]>([])
   const graph_container = useRef<any>(null)
   const graph = useRef<any>()
   const graph_color = useRef<string[]>(['#bababa', '#d2c7a3', '#a3c9d2'])
 
   useEffect(() => {
-    redisData.map(r => rose.current.push(r.uv_rose))
-    console.log(rose.current);
-
+    redisData.map(r => rose.current.push({ ...r, frame: r.game_info.frame, uv_rose: r.uv_rose + Math.random() * 100 }))
   }, [])
 
   useEffect(() => {
@@ -61,7 +59,7 @@ export const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
       .transform({ type: 'groupX' })
       .data(rose.current)
       .encode('x', 'frame')
-      .encode('y', 'uv')
+      .encode('y', 'uv_rose')
       // .encode('shape', 'triangle')
       .axis('x', { line: true, labelFilter: () => false, lineStroke: "#fff", lineLineWidth: "2", tickStroke: "#fff" })
       .axis('y', {
@@ -69,7 +67,10 @@ export const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
         label: false
       })
       .style('fill', (datum: any) => {
-        const val = datum
+        const { uv_rose } = datum
+        const val = uv_rose * 1 + (Math.random() * 10)
+        console.log(datum);
+
         if (val > 0 && val < 30) {
           return graph_color.current[0];
         } else if (val > 30 && val < 130) {
