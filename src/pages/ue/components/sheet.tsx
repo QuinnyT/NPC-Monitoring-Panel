@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react"
-import { useApi } from "@/hooks/use-api"
+import { useEffect, useRef, useState } from "react"
+
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { ChevronLeft, Heart, Award, Users2, ShieldCheck, BadgeJapaneseYen, LucideIcon } from "lucide-react"
-import { Chart } from '@antv/g2';
-import { api } from "@/lib/api"
+
 import { AttrValue, useRedis } from "@/hooks/use-redis"
 import { RoseGraph } from "./rose-graph"
 
@@ -45,12 +44,34 @@ const infos: Info[] = [
 ]
 
 export const Sheet = () => {
-  const { redisData } = useRedis()
-  console.log('zustand', redisData);
   const [isDisplay, setIsDisplay] = useState(false)
-  const attrValues = useRef<AttrValue>()
 
-  const UV = useRef<number>(0)
+  const { redisData } = useRedis()
+  const attrValues = useRef<AttrValue>()
+  const UV = useRef<number>()
+  const index = useRef<number>()
+
+  useEffect(() => {
+    if (redisData && redisData.length > 0) {
+      console.log(redisData[redisData.length - 1]);
+      UV.current = redisData[redisData.length - 1].uv_bar
+      attrValues.current = redisData[redisData.length - 1].attr_value
+      // todo
+      if (UV.current <= -30) {
+        index.current = 0
+      } else if (UV.current <= -10 && UV.current > -30) {
+        index.current = 1
+      } else if (UV.current <= 10 && UV.current > -10) {
+        index.current = 2
+      } else if (UV.current <= 30 && UV.current > 10) {
+        index.current = 3
+      } else {
+        index.current = 4
+      }
+    }
+  }, [redisData])
+
+
   const color = [
     "#bfa280",
     "#ada18a",
@@ -58,72 +79,6 @@ export const Sheet = () => {
     "#88a09e",
     "#769fa8",
   ]
-  let index = Math.min(Math.floor(UV.current / 100), color.length - 1)
-
-  // todo migrate to zustand state
-  const gameInfo = useRef<{ day: number; time: string; frame: number; uv: number; }[]>()
-  const graph_container = useRef<any>(null)
-  const graph = useRef<any>()
-  const graph_color = useRef<string[]>(['#bababa', '#d2c7a3', '#a3c9d2'])
-
-  const fetchApi = useCallback(async () => {
-    const data = await api();
-    attrValues.current = data.attr_value
-    UV.current = data.uv
-    gameInfo.current = data.game_info
-  }, [])
-
-  useEffect(() => {
-    fetchApi()
-  }, [fetchApi])
-
-  useEffect(() => {
-
-    if (!graph_container.current) return
-
-
-    const chart = new Chart({
-      container: graph_container.current,
-      width: 250,
-      height: 250,
-    });
-
-    graph.current = chart
-
-    chart.coordinate({ type: 'polar', outerRadius: 0.9 });
-
-    chart
-      .interval()
-      .transform({ type: 'groupX' })
-      .data({
-        value: gameInfo.current,
-      })
-      .encode('x', 'frame')
-      .encode('y', 'uv')
-      // .encode('shape', 'triangle')
-      .axis('x', { line: true, labelFilter: () => false, lineStroke: "#fff", lineLineWidth: "2", tickStroke: "#fff" })
-      .axis('y', {
-        title: false,
-        label: false
-      })
-      .style('fill', (datum: any) => {
-        const { uv } = datum
-        const val = uv * 1
-        if (val > 0 && val < 30) {
-          return graph_color.current[0];
-        } else if (val > 30 && val < 130) {
-          return graph_color.current[1];
-        } else {
-          return graph_color.current[2];
-        }
-      })
-
-    chart.render();
-
-    return () => {
-      chart.destroy()
-    }
-  }, [isDisplay])
 
   return (
     <div
@@ -165,15 +120,17 @@ export const Sheet = () => {
                   <div
                     className="absolute bg-transparent left-[50%] translate-x-[-50%] w-6 h-3 border-2 border-white rounded-[50%]"
                     style={{
-                      top: `${(UV.current - 10) / 500 * 8.5}rem`,
-                      backgroundColor: color[index]
+                      top: `${(UV.current! + 50) / 100 * 8.5}rem`,
+                      backgroundColor: color[index.current!]
                     }}
                   >
                     <p
                       className="absolute -top-[11px] left-7 text-lg font-semibold"
-                      style={{ color: color[index] }}
+                      style={{ color: color[index.current!] }}
                     >
-                      U&gt;V
+                      {
+                        index.current === 3 ? 'U≈V' : index.current! > 3 ? 'U>V' : 'U<V'
+                      }
                     </p>
                   </div>
                 </div>
@@ -182,7 +139,6 @@ export const Sheet = () => {
               </div>
               <div className="flex flex-col items-center relative">
                 <p className="text-xl absolute -top-2">UV Energy</p>
-                {/* <div ref={graph_container} id="graph_container"></div> */}
                 <RoseGraph isDisplay />
               </div>
             </div>
