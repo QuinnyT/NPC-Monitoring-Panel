@@ -24,9 +24,13 @@ export type RedisData = {
 interface useRedisStore {
 	redisData: RedisData[];
 	setRedisData: (data: RedisData[]) => void;
+	targetId: string;
+	setTargetId: (data: string) => void;
 }
 
 export const useRedis = create<useRedisStore>((set) => ({
 	redisData: [],
 	setRedisData: (redisData) => set(() => ({ redisData })),
+	targetId: "",
+	setTargetId: (targetId) => set(() => ({ targetId }))
 }));

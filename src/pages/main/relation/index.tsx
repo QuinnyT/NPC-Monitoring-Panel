@@ -22,7 +22,7 @@ export default function RelationPage() {
       <div className="relative top-12 flex justify-center pr-96">
         {
           character.relateCharacter.map((data, index) => (
-            <Dialog>
+            <Dialog key={index}>
               <DialogTrigger asChild>
                 <div
                   className="absolute flex flex-col justify-center items-center gap-y-3 origin-bottom"

@@ -1,5 +1,7 @@
 import request from "./request";
 
+const { MODE } = import.meta.env;
+
 export const api = () => {
   // 模拟请求，后续直接修改导出的函数名字即可
   return Promise.resolve({
@@ -27,16 +29,21 @@ export const api = () => {
   });
 };
 
-export const queryUVAnalysis = () => {
+export const createBWYInstanceApi = (data: any) => {
   return request({
-    url: "/queryUVAnalysis",
+    baseURL: "",
+    url: `http://${MODE === "development" ? 'localhost:5173' : "106.55.79.139:60001"}/createBWYInstance`,
     method: "POST",
+    data,
   });
 };
+console.log(MODE);
 
-export const queryCurrentAgentInfo = () => {
+export const createUEInstanceApi = (data: any) => {
   return request({
-    url: "/queryCurrentAgentInfo",
+    baseURL: "",
+    url: `http://${MODE === "development" ? 'localhost:5173' : "localhost:60000"}/createUEInstance`,
     method: "POST",
+    data,
   });
 };

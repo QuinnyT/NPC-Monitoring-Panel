@@ -1,8 +1,10 @@
-import { useEffect, useRef } from "react"
+import { memo, useCallback, useEffect, useRef } from "react"
 import { Chart } from '@antv/g2';
 import { useRedis } from "@/hooks/use-redis";
+import axios from "axios";
+import { useIntervalAsync } from "@/hooks/use-intervalAsync";
 
-export const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
+const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
   const { redisData } = useRedis()
 
 
@@ -12,15 +14,38 @@ export const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
   const graph = useRef<any>()
   const graph_color = useRef<string[]>(['#bababa', '#d2c7a3', '#a3c9d2'])
 
+  const handleGraphInit = async () => {
+    if (!redisData) return
+    rose.current = []
+    // redisData.map((r, index) => {
+    //   if (index > 9) return
+    //   return rose.current.push({ ...r, frame: r.game_info.frame })
+    // })
+    // let index = 1
+    // for (const i of redisData) {
+    //   index++;
+    //   if (index < 10) {
+    //     rose.current.push({ ...i, frame: i.game_info.frame, uv_rose: i.uv_rose + Math.random() * 100 })
+    //   } else {
+    //     return Promise.resolve(1)
+    //   }
+    // }
+    // redisData.map((r, index) => {
+    //   if (index < 10) {
+    //     return rose.current.push({ ...r, frame: r.game_info.frame, uv_rose: r.uv_rose + Math.random() * 100 })
+    //   }
+    // })
+  }
+
   useEffect(() => {
-    redisData.map(r => rose.current.push({ ...r, frame: r.game_info.frame, uv_rose: r.uv_rose + Math.random() * 100 }))
-  }, [])
+    handleGraphInit()
+  }, [isDisplay, redisData])
 
   useEffect(() => {
     /**
     * A recreation of this demo: https://observablehq.com/@d3/radial-stacked-bar-chart
     */
-    if (!graph_container.current) return
+    if (!graph_container.current || !redisData) return
 
     // // 定义图形组件
     // function ShapeTriangle(style, context) {
@@ -56,20 +81,30 @@ export const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
 
     chart
       .interval()
-      .transform({ type: 'groupX' })
-      .data(rose.current)
-      .encode('x', 'frame')
-      .encode('y', 'uv_rose')
+      .transform({ type: 'groupX', x: "first" })
+      .data({
+        type: 'inline',
+        value: redisData,
+        transform: [{
+          type: 'map',
+          callback: (datum: any) => {
+            return { ...datum, frame: datum.game_info.frame }
+          },
+        }],
+      })
+      .encode({ 'x': 'frame', 'y': 'uv_rose' })
       // .encode('shape', 'triangle')
-      .axis('x', { line: true, labelFilter: () => false, lineStroke: "#fff", lineLineWidth: "2", tickStroke: "#fff" })
+      .axis('x', {
+        line: true, label: true, labelFill: "#fff", lineStroke: "#fff", lineLineWidth: "2", tickStroke: "#fff", title: false
+      })
       .axis('y', {
-        title: false,
-        label: false
+        tick: false,
+        label: false,
+        title: false
       })
       .style('fill', (datum: any) => {
         const { uv_rose } = datum
         const val = uv_rose * 1 + (Math.random() * 10)
-        console.log(datum);
 
         if (val > 0 && val < 30) {
           return graph_color.current[0];
@@ -88,7 +123,21 @@ export const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
     return () => {
       chart.destroy()
     }
-  }, [isDisplay])
+  }, [redisData, isDisplay])
 
-  return <div ref={graph_container} id="graph_container" />
+  const handleRequest = useCallback(async () => {
+    let { data } = await axios.get("http://localhost:3000/1")
+    console.log("fetch", data);
+    // setRedisData(data);
+    data = data.slice(0, 9).map((i: any) => ({ ...i, frame: i.game_info.frame, uv_rose: i.uv_rose + Math.random() * 100 }))
+    window.requestIdleCallback(() => {
+      graph.current.changeData(data);
+    })
+  }, [])
+
+  useIntervalAsync(handleRequest, 3000)
+
+  return <div ref={graph_container} id="graph_container" className="" />
 }
+
+export default memo(RoseGraph)

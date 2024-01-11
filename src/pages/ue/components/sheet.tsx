@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress"
 import { ChevronLeft, Heart, Award, Users2, ShieldCheck, BadgeJapaneseYen, LucideIcon } from "lucide-react"
 
 import { AttrValue, useRedis } from "@/hooks/use-redis"
-import { RoseGraph } from "./rose-graph"
+import RoseGraph from "./rose-graph"
 
 type Info = {
   label: string,
@@ -43,17 +43,18 @@ const infos: Info[] = [
   }
 ]
 
-export const Sheet = () => {
+export const Sheet = (props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
+) => {
   const [isDisplay, setIsDisplay] = useState(false)
 
   const { redisData } = useRedis()
-  const attrValues = useRef<AttrValue>()
+  const attrValues = useRef<AttrValue | { [key: string]: number }>({})
   const UV = useRef<number>()
   const index = useRef<number>()
 
   useEffect(() => {
     if (redisData && redisData.length > 0) {
-      console.log(redisData[redisData.length - 1]);
+      // console.log(redisData[redisData.length - 1]);
       UV.current = redisData[redisData.length - 1].uv_bar
       attrValues.current = redisData[redisData.length - 1].attr_value
       // todo
@@ -82,6 +83,7 @@ export const Sheet = () => {
 
   return (
     <div
+      {...props}
       className="absolute top-0 right-0 z-50 h-full flex items-center rounded-r-2xl overflow-x-hidden bg-white/10 backdrop-blur transition-all ease-in-out"
       style={{
         width: isDisplay ? '35vw' : '3vw',
@@ -96,7 +98,7 @@ export const Sheet = () => {
         isDisplay && (
           <div className="flex flex-col text-white">
             <div className="w-64 px-3 py-1 mb-5 text-lg font-semibold bg-gradient-to-r from-[#3B3630]/30 to-[#5E5840]/30">CURRENT AGENT INFO</div>
-            <div className="w-[30vw] h-[30vh] p-2 bg-[#1F1F1F]">
+            <div className="w-[30vw] h-[30vh] p-2 px-6 bg-[#1F1F1F]">
               <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">李 白</div>
               <div className="flex flex-col gap-y-2">
                 {infos.map(info => (
@@ -137,8 +139,8 @@ export const Sheet = () => {
                 <span>V</span>
                 <p className="text-sm indent-3 tracking-wider">(Individual Integrity)</p>
               </div>
-              <div className="flex flex-col items-center relative">
-                <p className="text-xl absolute -top-2">UV Energy</p>
+              <div className="flex flex-col justify-center items-center relative h-full mt-4">
+                <p className="text-xl">UV Energy</p>
                 <RoseGraph isDisplay />
               </div>
             </div>

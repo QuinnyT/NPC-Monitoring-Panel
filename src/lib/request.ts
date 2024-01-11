@@ -13,7 +13,7 @@ request.interceptors.request.use(
   },
   function (error) {
     // 对请求错误做些什么
-    return Promise.reject(error);
+    return console.log(error);
   }
 );
 
@@ -27,7 +27,7 @@ request.interceptors.response.use(
   function (error) {
     // 超出 2xx 范围的状态码都会触发该函数。
     // 对响应错误做点什么
-    return Promise.reject(error);
+    return console.log(error);
   }
 );
 

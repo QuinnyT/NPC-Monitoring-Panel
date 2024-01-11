@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   Config,
   AllSettings,
@@ -14,6 +14,8 @@ import {
 } from '@epicgames-ps/lib-pixelstreamingfrontend-ui-ue5.3';
 import { Sheet } from './sheet';
 import { useApi } from '@/hooks/use-api';
+// import { createBWYInstanceApi, createUEInstanceApi } from '@/lib/api';
+import { useRedis } from "@/hooks/use-redis";
 
 export const PixelStreamingApplicationStyles =
   new PixelStreamingApplicationStyle();
@@ -29,9 +31,23 @@ export const PixelStreamingWrapper = ({
 }: PixelStreamingWrapperProps) => {
 
   useApi()
+  const { setTargetId } = useRedis()
 
   // A reference to parent div element that the Pixel Streaming library attaches into:
   const videoParent = useRef<HTMLDivElement>(null);
+  const UEClient = useRef<boolean>(false)
+  const cursorState = useRef<boolean>(false) // 0 hide 1 show
+  const currentKey = useRef<string>('')
+
+  const handleClickStart = useCallback(async (e: React.MouseEvent) => {
+    UEClient.current = true
+    if ((e.target as any).nodeName === 'DIV' && !UEClient.current) {
+      // const data1 = await createBWYInstanceApi({ msg: 'create' })
+      // console.log(data1);
+      // const data2 = await createUEInstanceApi({ msg: 'create' })
+      // console.log(data2);
+    }
+  }, [])
 
   // Pixel streaming library instance is stored into this state variable after initialization:
   // const [pixelStreaming, setPixelStreaming] = useState<PixelStreaming>();
@@ -70,7 +86,7 @@ export const PixelStreamingWrapper = ({
   useEffect(() => {
     if (videoParent.current) {
       // Attach Pixel Streaming library to videoParent element:
-      const config = new Config({ initialSettings, useUrlParams: true });
+      const config = new Config({ initialSettings });
 
       // const streaming = new PixelStreaming(config, {
       //     videoElementParent: videoParent.current
@@ -91,6 +107,12 @@ export const PixelStreamingWrapper = ({
         }
       });
 
+      streaming.addResponseEventListener('handle_responses', (response) => {
+        const { SpectateTargetID } = JSON.parse(response)
+        console.log(SpectateTargetID);
+        setTargetId(SpectateTargetID)
+      })
+
       videoParent.current.appendChild(application.rootElement);
 
       // register a playStreamRejected handler to show Click to play overlay if needed:
@@ -100,11 +122,54 @@ export const PixelStreamingWrapper = ({
       // Save the library instance into component state so that it can be accessed later:
       // setPixelStreaming(streaming);
 
+      function hijackAlt(e: KeyboardEvent) {
+        if ((e.key === 'm' || e.key === 'Alt') && UEClient.current) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          console.log('m', currentKey.current, e.key);
+
+          // if (currentKey.current === "") {
+          //   currentKey.current = e.key
+          // }
+
+          if (currentKey.current !== e.key) {
+            config.setSettings({ HoveringMouse: true })
+            cursorState.current = true
+            currentKey.current = e.key
+            console.log('触发alt 现在HoveringMouse: true');
+          } else {
+            config.setSettings({ HoveringMouse: false })
+            cursorState.current = false
+            currentKey.current = ""
+            console.log('触发alt 现在HoveringMouse: false');
+          }
+
+          // currentKey.current = e.key
+
+          // if (!cursorState.current) {
+          //   config.setSettings({ HoveringMouse: true })
+          //   cursorState.current = true
+          //   currentKey.current = e.key
+          //   console.log('触发alt 现在HoveringMouse: true');
+          // } else {
+          //   config.setSettings({ HoveringMouse: false })
+          //   cursorState.current = false
+          //   currentKey.current = ""
+          //   console.log('触发alt 现在HoveringMouse: false');
+          // }
+        }
+      }
+
+      window.addEventListener("keyup", hijackAlt)
+
       // Clean up on component unmount:
       return () => {
         try {
           streaming.disconnect();
           videoParent.current!.removeChild(application.rootElement);
+          streaming.removeResponseEventListener('handle_responses')
+          window.removeEventListener("keyup", hijackAlt)
         } catch { /* empty */ }
       };
     }
@@ -112,10 +177,12 @@ export const PixelStreamingWrapper = ({
 
   return (
     <div
+      id='pixelStreaming'
       className='relative w-full h-full'
       ref={videoParent}
+      onClick={handleClickStart}
     >
-      <Sheet />
+      <Sheet onClick={(e) => { e.preventDefault(); e.stopPropagation() }} />
     </div>
     /* {clickToPlayVisible && (
         <div
