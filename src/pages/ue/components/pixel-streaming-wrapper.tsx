@@ -109,7 +109,6 @@ export const PixelStreamingWrapper = ({
 
       streaming.addResponseEventListener('handle_responses', (response) => {
         const { SpectateTargetID } = JSON.parse(response)
-        console.log(SpectateTargetID);
         setTargetId(SpectateTargetID)
       })
 

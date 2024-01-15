@@ -32,18 +32,32 @@ export const api = () => {
 export const createBWYInstanceApi = (data: any) => {
   return request({
     baseURL: "",
-    url: `http://${MODE === "development" ? 'localhost:5173' : "106.55.79.139:60001"}/createBWYInstance`,
+    url: `http://${
+      MODE === "development" ? "localhost:5173" : "106.55.79.139:60001"
+    }/createBWYInstance`,
     method: "POST",
     data,
   });
 };
-console.log(MODE);
 
 export const createUEInstanceApi = (data: any) => {
   return request({
     baseURL: "",
-    url: `http://${MODE === "development" ? 'localhost:5173' : "localhost:60000"}/createUEInstance`,
+    url: `http://${
+      MODE === "development" ? "localhost:5173" : "localhost:60000"
+    }/createUEInstance`,
     method: "POST",
     data,
+  });
+};
+
+export const getTargetData = (id: any) => {
+  const sourceId = 10001;
+  return request({
+    baseURL: "",
+    url: `http://${
+      MODE === "development" ? "localhost:3000" : "localhost:3000"
+    }/${id - sourceId}`,
+    method: "GET",
   });
 };

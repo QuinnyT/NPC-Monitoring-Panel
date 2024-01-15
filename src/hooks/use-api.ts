@@ -9,28 +9,15 @@ const postFetcher = ([url, data]: any) =>
   axios.post(url, { ...data }).then((res) => res.data);
 
 export const useApi = () => {
-  let { data } = useSWR("http://localhost:3000/1", getFetcher);
-  const { setRedisData } = useRedis();
+  const { setRedisData, targetId } = useRedis();
+  let { data } = useSWR(
+    `http://localhost:3000/${targetId - 10001}`,
+    getFetcher
+  );
   useEffect(() => {
     if (data) {
-      setRedisData(data.slice(0, 9));
-      console.log(data.slice(0, 9));
+      setRedisData(data.slice(data.length - 10));
+      console.log(data.slice(data.length - 10));
     }
   }, [data, setRedisData]);
-};
-
-export const useCreateBWYInstanceApi = (d: any) => {
-  const { data } = useSWR(
-    ["http://106.55.79.139:60001/createBWYInstance", d],
-    postFetcher
-  );
-  return Promise.resolve(data);
-};
-
-export const useCreateUEInstanceApi = (d: any) => {
-  const { data } = useSWR(
-    ["http://localhost:60000/createUEInstance", d],
-    postFetcher
-  );
-  return Promise.resolve(data);
 };

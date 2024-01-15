@@ -1,11 +1,12 @@
 import { memo, useCallback, useEffect, useRef } from "react"
 import { Chart } from '@antv/g2';
 import { useRedis } from "@/hooks/use-redis";
-import axios from "axios";
 import { useIntervalAsync } from "@/hooks/use-intervalAsync";
+import { getTargetData } from "@/lib/api";
+import { Slider } from "@/components/ui/slider"
 
 const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
-  const { redisData } = useRedis()
+  const { redisData, setRedisData, targetId } = useRedis()
 
 
   // todo migrate to zustand state
@@ -92,8 +93,7 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
           },
         }],
       })
-      .encode({ 'x': 'frame', 'y': 'uv_rose' })
-      // .encode('shape', 'triangle')
+      .encode({ x: 'frame', y: 'uv_rose' })
       .axis('x', {
         line: true, label: true, labelFill: "#fff", lineStroke: "#fff", lineLineWidth: "2", tickStroke: "#fff", title: false
       })
@@ -114,6 +114,12 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
           return graph_color.current[2];
         }
       })
+    // .legend({ color: { layout: { flexDirection: 'column', justifyContent: "center" }, 'position': "bottom" } })
+    // .scrollbar({
+    //   'x': {
+    //     value: 1, ratio: 0.7
+    //   }
+    // });
     // .tooltip(false)
     // .animate('enter', { type: 'waveIn' })
     // .tooltip({ channel: 'y', valueFormatter: '~s' });
@@ -123,21 +129,34 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
     return () => {
       chart.destroy()
     }
-  }, [redisData, isDisplay])
+  }, [isDisplay])
 
   const handleRequest = useCallback(async () => {
-    let { data } = await axios.get("http://localhost:3000/1")
+    let { data } = await getTargetData(targetId)
     console.log("fetch", data);
-    // setRedisData(data);
-    data = data.slice(0, 9).map((i: any) => ({ ...i, frame: i.game_info.frame, uv_rose: i.uv_rose + Math.random() * 100 }))
+    if (data.length < 10) {
+      data = data.map((i: any) => ({ ...i, frame: i.game_info.frame }))
+      setRedisData(data);
+    } else {
+      data = data.slice(data.length - 10).map((i: any) => ({ ...i, frame: i.game_info.frame }))
+      setRedisData(data);
+    }
     window.requestIdleCallback(() => {
       graph.current.changeData(data);
     })
-  }, [])
+  }, [targetId])
 
   useIntervalAsync(handleRequest, 3000)
 
-  return <div ref={graph_container} id="graph_container" className="" />
+  const onValueChange = useCallback((value: number[]) => {
+    console.log(value);
+
+  }, [])
+
+  return <>
+    <div ref={graph_container} id="graph_container" />
+    <Slider defaultValue={[100]} max={100} step={1} onValueChange={onValueChange} />
+  </>
 }
 
 export default memo(RoseGraph)
