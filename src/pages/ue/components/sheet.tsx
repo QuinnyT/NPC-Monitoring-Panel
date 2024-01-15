@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -51,6 +51,7 @@ export const Sheet = (props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDi
   const [attrValues, setAttrValues] = useState<AttrValue | { [key: string]: number }>({})
   const [UV, setUV] = useState<number>(0)
   const [index, setIndex] = useState<number>(0)
+  const [isUVShow, setIsUVShow] = useState<boolean>(false)
 
   useEffect(() => {
     if (redisData && redisData.length > 0) {
@@ -83,6 +84,14 @@ export const Sheet = (props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDi
     "#88a09e",
     "#769fa8",
   ]
+
+  const handleUVMouseEnter = useCallback(() => {
+    setIsUVShow(true)
+  }, [])
+
+  const handleUVMouseLeave = useCallback(() => {
+    setIsUVShow(false)
+  }, [])
 
   return (
     <div
@@ -128,13 +137,16 @@ export const Sheet = (props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDi
                       top: `${(UV! + 100) / 2}%`,
                       backgroundColor: color[index!]
                     }}
+                    onMouseEnter={handleUVMouseEnter}
+                    onMouseLeave={handleUVMouseLeave}
                   >
                     <p
                       className="absolute -top-[11px] left-7 text-lg font-semibold"
-                      style={{ color: color[index!] }}
+                      style={{ color: color[index!], whiteSpace: "nowrap" }}
                     >
                       {/* {index === 3 ? 'U≈V' : index! > 3 ? 'U>V' : 'U<V'} */}
                       {UV === 0 ? 'U≈V' : UV < 0 ? 'U>V' : 'U<V'}
+                      <span className="transition-all duration-200" style={{ opacity: isUVShow ? 1 : 0 }}>({UV.toFixed(1)})</span>
                     </p>
                   </div>
                 </div>
