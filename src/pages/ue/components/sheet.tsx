@@ -111,7 +111,7 @@ export const Sheet = (props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDi
           <div className="flex flex-col text-white">
             <div className="w-64 px-3 py-1 mb-5 text-lg font-semibold bg-gradient-to-r from-[#3B3630]/30 to-[#5E5840]/30">CURRENT AGENT INFO</div>
             <div className="w-[30vw] h-[30vh] p-2 px-6 bg-[#1F1F1F]">
-              <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">{redisData[0].name}</div>
+              <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">{redisData.length ? redisData[0].name : ""}</div>
               <div className="flex flex-col gap-y-2">
                 {infos.map(info => (
                   <div className="flex justify-between items-center gap-x-2" key={info.label}>
