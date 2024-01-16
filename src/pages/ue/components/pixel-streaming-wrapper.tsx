@@ -181,7 +181,7 @@ export const PixelStreamingWrapper = ({
       ref={videoParent}
       onClick={handleClickStart}
     >
-      <Sheet onClick={(e) => { e.preventDefault(); e.stopPropagation() }} />
+      <Sheet />
     </div>
     /* {clickToPlayVisible && (
         <div
