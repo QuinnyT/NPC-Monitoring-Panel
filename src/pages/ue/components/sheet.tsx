@@ -43,12 +43,20 @@ const infos: Info[] = [
   }
 ]
 
-export const Sheet = (props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
-) => {
+const color = [
+  "#bfa280",
+  "#ada18a",
+  "#9ba194",
+  "#88a09e",
+  "#769fa8",
+]
+
+export const Sheet = () => {
+  const { redisData } = useRedis()
+
   const [isDisplay, setIsDisplay] = useState(false)
 
-  const { redisData } = useRedis()
-  const [attrValues, setAttrValues] = useState<AttrValue | { [key: string]: number }>({})
+  const [attrValues, setAttrValues] = useState<AttrValue>()
   const [UV, setUV] = useState<number>(0)
   const [index, setIndex] = useState<number>(0)
   const [isUVShow, setIsUVShow] = useState<boolean>(false)
@@ -64,26 +72,19 @@ export const Sheet = (props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDi
   useEffect(() => {
     if (!UV) return
     // todo
-    if (UV <= -30) {
+    if (UV <= -60) {
       setIndex(0)
-    } else if (UV <= -10 && UV > -30) {
+    } else if (UV <= -20 && UV > -60) {
       setIndex(1)
-    } else if (UV <= 10 && UV > -10) {
+    } else if (UV <= 20 && UV > -20) {
       setIndex(2)
-    } else if (UV <= 30 && UV > 10) {
+    } else if (UV <= 60 && UV > 20) {
       setIndex(3)
     } else {
       setIndex(4)
     }
   }, [UV])
 
-  const color = [
-    "#bfa280",
-    "#ada18a",
-    "#9ba194",
-    "#88a09e",
-    "#769fa8",
-  ]
 
   const handleUVMouseEnter = useCallback(() => {
     setIsUVShow(true)
@@ -95,7 +96,7 @@ export const Sheet = (props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDi
 
   return (
     <div
-      {...props}
+      onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
       className="absolute top-0 right-0 z-50 h-full flex items-center rounded-r-2xl overflow-x-hidden bg-white/10 backdrop-blur transition-all ease-in-out"
       style={{
         width: isDisplay ? '35vw' : '3vw',
@@ -126,36 +127,48 @@ export const Sheet = (props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDi
                 ))}
               </div>
             </div>
+
             <div className="w-52 px-3 py-1 my-5 text-lg font-semibold bg-gradient-to-r from-[#3B3630]/30 to-[#5E5840]/30">UV ANALYSIS</div>
             <div className="flex justify-between items-center px-6 w-[30vw] h-[32vh] bg-[#1F1F1F]">
-              <div className="flex flex-col items-center">
-                <p className="text-sm indent-3 tracking-wider">(Social Conformity)</p>
-                <span>U</span>
-                <div className="relative bg-gradient-to-b from-[#BFA280] to-[#769FA8] w-2 h-36">
-                  <div
-                    className="absolute bg-transparent left-[50%] translate-x-[-50%] w-6 h-3 border-2 border-white rounded-[50%] transition-all duration-200"
-                    style={{
-                      top: `${(UV! + 100) / 2}%`,
-                      backgroundColor: color[index!]
-                    }}
-                    onMouseEnter={handleUVMouseEnter}
-                    onMouseLeave={handleUVMouseLeave}
-                  >
-                    <p
-                      className="absolute -top-[11px] left-7 text-lg font-semibold"
-                      style={{ color: color[index!], whiteSpace: "nowrap" }}
-                    >
-                      {/* {index === 3 ? 'U≈V' : index! > 3 ? 'U>V' : 'U<V'} */}
-                      {UV === 0 ? 'U≈V' : UV < 0 ? 'U>V' : 'U<V'}
-                      <span className="transition-all duration-200" style={{ opacity: isUVShow ? 1 : 0 }}>({UV.toFixed(1)})</span>
-                    </p>
+              <>
+                <div className="flex flex-col items-center">
+                  <p className="text-xl indent-3 tracking-wider">Equilibrium State</p>
+                  <div>
+                    <div></div>
+                    <span>U: Social Conformity</span>
                   </div>
+                  <div>
+                    <div></div>
+                    <span>V: Individual Integrity</span>
+                  </div>
+                  <div className="relative w-4 h-40 border-2 border-[#B0B0B0]">
+                    {/* <div
+                      className="absolute bg-transparent left-[50%] translate-x-[-50%] w-6 h-3 border-2 border-white rounded-[50%] transition-all duration-200"
+                      style={{
+                        top: `${UV! / 2 + 45}%`,
+                        backgroundColor: color[index!]
+                      }}
+                      onMouseEnter={handleUVMouseEnter}
+                      onMouseLeave={handleUVMouseLeave}
+                    >
+                      <p
+                        className="absolute -top-[11px] left-7 text-lg font-semibold"
+                        style={{ color: color[index!], whiteSpace: "nowrap" }}
+                      >
+                        {UV === 0 ? 'U≈V' : UV < 0 ? 'U>V' : 'U<V'}
+                        <span className="transition-all duration-200" style={{ opacity: isUVShow ? 1 : 0 }}>({UV.toFixed(1)})</span>
+                      </p>
+                    </div> */}
+
+                    <div className="absolute bottom-0 w-full h-[70%] bg-red-400">
+                      <div className="absolute top-0 w-full h-[40%] bg-blue-400"></div>
+                    </div>
+                  </div>
+
                 </div>
-                <span>V</span>
-                <p className="text-sm indent-3 tracking-wider">(Individual Integrity)</p>
-              </div>
+              </>
               <div className="flex flex-col justify-center items-center relative h-full mt-4">
-                <p className="text-xl">UV Energy</p>
+                <p className="text-xl indent-3 tracking-wider">UV Energy</p>
                 <RoseGraph isDisplay />
               </div>
             </div>
