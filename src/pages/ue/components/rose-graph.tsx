@@ -126,7 +126,7 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
 
     chart.render();
 
-    return () => {
+    return () => { 
       chart.destroy()
     }
   }, [isDisplay])

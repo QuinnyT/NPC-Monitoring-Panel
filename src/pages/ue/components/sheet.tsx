@@ -53,7 +53,7 @@ const color = [
 
 export const Sheet = () => {
   const { redisData } = useRedis()
-  
+
   const [isDisplay, setIsDisplay] = useState(false)
 
   const [attrValues, setAttrValues] = useState<AttrValue>()
@@ -126,35 +126,48 @@ export const Sheet = () => {
                 ))}
               </div>
             </div>
+
             <div className="w-52 px-3 py-1 my-5 text-lg font-semibold bg-gradient-to-r from-[#3B3630]/30 to-[#5E5840]/30">UV ANALYSIS</div>
             <div className="flex justify-between items-center px-6 w-[30vw] h-[32vh] bg-[#1F1F1F]">
-              <div className="flex flex-col items-center">
-                <p className="text-sm indent-3 tracking-wider">(Social Conformity)</p>
-                <span className="mb-2">U</span>
-                <div className="relative bg-gradient-to-b from-[#BFA280] to-[#769FA8] w-2 h-36">
-                  <div
-                    className="absolute bg-transparent left-[50%] translate-x-[-50%] w-6 h-3 border-2 border-white rounded-[50%] transition-all duration-200"
-                    style={{
-                      top: `${UV! / 2 + 45}%`,
-                      backgroundColor: color[index!]
-                    }}
-                    onMouseEnter={handleUVMouseEnter}
-                    onMouseLeave={handleUVMouseLeave}
-                  >
-                    <p
-                      className="absolute -top-[11px] left-7 text-lg font-semibold"
-                      style={{ color: color[index!], whiteSpace: "nowrap" }}
-                    >
-                      {UV === 0 ? 'U≈V' : UV < 0 ? 'U>V' : 'U<V'}
-                      <span className="transition-all duration-200" style={{ opacity: isUVShow ? 1 : 0 }}>({UV.toFixed(1)})</span>
-                    </p>
+              <>
+                <div className="flex flex-col items-center">
+                  <p className="text-xl indent-3 tracking-wider">Equilibrium State</p>
+                  <div>
+                    <div></div>
+                    <span>U: Social Conformity</span>
                   </div>
+                  <div>
+                    <div></div>
+                    <span>V: Individual Integrity</span>
+                  </div>
+                  <div className="relative w-4 h-40 border-2 border-[#B0B0B0]">
+                    {/* <div
+                      className="absolute bg-transparent left-[50%] translate-x-[-50%] w-6 h-3 border-2 border-white rounded-[50%] transition-all duration-200"
+                      style={{
+                        top: `${UV! / 2 + 45}%`,
+                        backgroundColor: color[index!]
+                      }}
+                      onMouseEnter={handleUVMouseEnter}
+                      onMouseLeave={handleUVMouseLeave}
+                    >
+                      <p
+                        className="absolute -top-[11px] left-7 text-lg font-semibold"
+                        style={{ color: color[index!], whiteSpace: "nowrap" }}
+                      >
+                        {UV === 0 ? 'U≈V' : UV < 0 ? 'U>V' : 'U<V'}
+                        <span className="transition-all duration-200" style={{ opacity: isUVShow ? 1 : 0 }}>({UV.toFixed(1)})</span>
+                      </p>
+                    </div> */}
+
+                    <div className="absolute bottom-0 w-full h-[70%] bg-red-400">
+                      <div className="absolute top-0 w-full h-[40%] bg-blue-400"></div>
+                    </div>
+                  </div>
+
                 </div>
-                <span className="mt-2">V</span>
-                <p className="text-sm indent-3 tracking-wider">(Individual Integrity)</p>
-              </div>
+              </>
               <div className="flex flex-col justify-center items-center relative h-full mt-4">
-                <p className="text-xl">UV Energy</p>
+                <p className="text-xl indent-3 tracking-wider">UV Energy</p>
                 <RoseGraph isDisplay />
               </div>
             </div>
