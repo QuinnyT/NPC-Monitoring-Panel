@@ -1,19 +1,19 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from "react";
 import {
   Config,
   AllSettings,
   PixelStreaming,
-} from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.3';
+} from "@epicgames-ps/lib-pixelstreamingfrontend-ue5.3";
 
 import {
   Application,
   PixelStreamingApplicationStyle,
-  UIElementCreationMode
-} from '@epicgames-ps/lib-pixelstreamingfrontend-ui-ue5.3';
-import { Sheet } from './sheet';
-import { useApi } from '@/hooks/use-api';
+  UIElementCreationMode,
+} from "@epicgames-ps/lib-pixelstreamingfrontend-ui-ue5.3";
+import { Sheet } from "./sheet";
+import { useApi } from "@/hooks/use-api";
 // import { createBWYInstanceApi, createUEInstanceApi } from '@/lib/api';
 import { useRedis } from "@/hooks/use-redis";
 
@@ -25,29 +25,27 @@ export interface PixelStreamingWrapperProps {
   initialSettings?: Partial<AllSettings>;
 }
 
-
 export const PixelStreamingWrapper = ({
-  initialSettings
+  initialSettings,
 }: PixelStreamingWrapperProps) => {
-
-  useApi()
-  const { setTargetId } = useRedis()
+  useApi();
+  const { setTargetId } = useRedis();
 
   // A reference to parent div element that the Pixel Streaming library attaches into:
   const videoParent = useRef<HTMLDivElement>(null);
-  const UEClient = useRef<boolean>(false)
-  const cursorState = useRef<boolean>(false) // 0 hide 1 show
-  const currentKey = useRef<string>('')
+  const UEClient = useRef<boolean>(false);
+  const cursorState = useRef<boolean>(false); // 0 hide 1 show
+  const currentKey = useRef<string>("");
 
   const handleClickStart = useCallback(async (e: React.MouseEvent) => {
-    UEClient.current = true
-    if ((e.target as any).nodeName === 'DIV' && !UEClient.current) {
+    UEClient.current = true;
+    if ((e.target as any).nodeName === "DIV" && !UEClient.current) {
       // const data1 = await createBWYInstanceApi({ msg: 'create' })
       // console.log(data1);
       // const data2 = await createUEInstanceApi({ msg: 'create' })
       // console.log(data2);
     }
-  }, [])
+  }, []);
 
   // Pixel streaming library instance is stored into this state variable after initialization:
   // const [pixelStreaming, setPixelStreaming] = useState<PixelStreaming>();
@@ -103,14 +101,16 @@ export const PixelStreamingWrapper = ({
         // },
         statsPanelConfig: {
           isEnabled: false,
-          visibilityButtonConfig: { creationMode: UIElementCreationMode.Disable }
-        }
+          visibilityButtonConfig: {
+            creationMode: UIElementCreationMode.Disable,
+          },
+        },
       });
 
-      streaming.addResponseEventListener('handle_responses', (response) => {
-        const { SpectateTargetID } = JSON.parse(response)
-        setTargetId(SpectateTargetID)
-      })
+      streaming.addResponseEventListener("handle_responses", (response) => {
+        const { SpectateTargetID } = JSON.parse(response);
+        setTargetId(SpectateTargetID);
+      });
 
       videoParent.current.appendChild(application.rootElement);
 
@@ -122,26 +122,26 @@ export const PixelStreamingWrapper = ({
       // setPixelStreaming(streaming);
 
       function hijackAlt(e: KeyboardEvent) {
-        if ((e.key === 'm' || e.key === 'Alt') && UEClient.current) {
+        if ((e.key === "m" || e.key === "Alt") && UEClient.current) {
           e.preventDefault();
           e.stopPropagation();
           e.stopImmediatePropagation();
-          console.log('m', currentKey.current, e.key);
+          console.log("m", currentKey.current, e.key);
 
           // if (currentKey.current === "") {
           //   currentKey.current = e.key
           // }
 
           if (currentKey.current !== e.key) {
-            config.setSettings({ HoveringMouse: true })
-            cursorState.current = true
-            currentKey.current = e.key
-            console.log('触发alt 现在HoveringMouse: true');
+            config.setSettings({ HoveringMouse: true });
+            cursorState.current = true;
+            currentKey.current = e.key;
+            console.log("触发alt 现在HoveringMouse: true");
           } else {
-            config.setSettings({ HoveringMouse: false })
-            cursorState.current = false
-            currentKey.current = ""
-            console.log('触发alt 现在HoveringMouse: false');
+            config.setSettings({ HoveringMouse: false });
+            cursorState.current = false;
+            currentKey.current = "";
+            console.log("触发alt 现在HoveringMouse: false");
           }
 
           // currentKey.current = e.key
@@ -160,24 +160,26 @@ export const PixelStreamingWrapper = ({
         }
       }
 
-      window.addEventListener("keyup", hijackAlt)
+      window.addEventListener("keyup", hijackAlt);
 
       // Clean up on component unmount:
       return () => {
         try {
           streaming.disconnect();
           videoParent.current!.removeChild(application.rootElement);
-          streaming.removeResponseEventListener('handle_responses')
-          window.removeEventListener("keyup", hijackAlt)
-        } catch { /* empty */ }
+          streaming.removeResponseEventListener("handle_responses");
+          window.removeEventListener("keyup", hijackAlt);
+        } catch {
+          /* empty */
+        }
       };
     }
   }, []);
 
   return (
     <div
-      id='pixelStreaming'
-      className='relative w-full h-full'
+      id="pixelStreaming"
+      className="relative w-full h-full"
       ref={videoParent}
       onClick={handleClickStart}
     >
