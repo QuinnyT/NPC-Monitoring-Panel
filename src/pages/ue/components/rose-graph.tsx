@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef } from "react"
+import { memo, useCallback, useEffect, useRef, useState } from "react"
 import { Chart } from '@antv/g2';
 import { useRedis } from "@/hooks/use-redis";
 import { useIntervalAsync } from "@/hooks/use-intervalAsync";
@@ -14,6 +14,9 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
   const graph_container = useRef<any>(null)
   const graph = useRef<any>()
   const graph_color = useRef<string[]>(['#bababa', '#d2c7a3', '#a3c9d2'])
+  const index = useRef<number>(10)
+  const [step, setStep] = useState<number>(1)
+
 
   const handleGraphInit = async () => {
     if (!redisData) return
@@ -72,8 +75,8 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
 
     const chart = new Chart({
       container: graph_container.current,
-      width: 250,
-      height: 250,
+      width: 240,
+      height: 240,
     });
 
     graph.current = chart
@@ -126,37 +129,399 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
 
     chart.render();
 
-    return () => { 
+    return () => {
       chart.destroy()
     }
   }, [isDisplay])
 
-  const handleRequest = useCallback(async () => {
-    let { data } = await getTargetData(targetId)
-    console.log("fetch", data);
-    if (data.length < 10) {
+  const handleRender = useCallback((data: any) => {
+    if (data.length <= 10) {
       data = data.map((i: any) => ({ ...i, frame: i.game_info.frame }))
       setRedisData(data);
     } else {
-      data = data.slice(data.length - 10).map((i: any) => ({ ...i, frame: i.game_info.frame }))
+      if (data.length > 110) {
+
+      } else {
+        setStep(Number((100 / (data.length - 10)).toFixed(1)))
+      }
+      data = data.slice(data.length - index.current).map((i: any) => ({ ...i, frame: i.game_info.frame }))
+      // data = data.map((i: any) => ({ ...i, frame: i.game_info.frame }))
       setRedisData(data);
     }
     window.requestIdleCallback(() => {
       graph.current.changeData(data);
     })
+  }, [index.current])
+
+  const handleRequest = useCallback(async () => {
+    let { data } = await getTargetData(targetId)
+    // data = [
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": "0",
+    //       "frame": 0
+    //     },
+    //     "attr_value": {
+    //       "Survival": 70,
+    //       "Belonging": 10,
+    //       "Social": 35,
+    //       "Intimacy": 0,
+    //       "Honor": 40
+    //     },
+    //     "u": 40,
+    //     "v": 25,
+    //     "uv_rose": 20.695067264573993
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 1
+    //     },
+    //     "attr_value": {
+    //       "Survival": 70,
+    //       "Belonging": 10,
+    //       "Social": 35,
+    //       "Intimacy": 0,
+    //       "Honor": 40
+    //     },
+    //     "u": 40,
+    //     "v": 25,
+    //     "uv_rose": 20.695067264573993
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 53
+    //     },
+    //     "attr_value": {
+    //       "Survival": 70,
+    //       "Belonging": 10,
+    //       "Social": 35,
+    //       "Intimacy": 0,
+    //       "Honor": 40
+    //     },
+    //     "u": 40,
+    //     "v": 25,
+    //     "uv_rose": 20.695067264573993
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 761
+    //     },
+    //     "attr_value": {
+    //       "Survival": 70,
+    //       "Belonging": 10,
+    //       "Social": 26,
+    //       "Intimacy": 0,
+    //       "Honor": 40
+    //     },
+    //     "u": 40,
+    //     "v": 22,
+    //     "uv_rose": 20.695067264573993
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 12
+    //     },
+    //     "attr_value": {
+    //       "Survival": 70,
+    //       "Belonging": 16,
+    //       "Social": 35,
+    //       "Intimacy": 0,
+    //       "Honor": 30
+    //     },
+    //     "u": 43,
+    //     "v": 21.666666666666668,
+    //     "uv_rose": 62.333333333333336
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 552
+    //     },
+    //     "attr_value": {
+    //       "Survival": 70,
+    //       "Belonging": 16,
+    //       "Social": 29,
+    //       "Intimacy": 0,
+    //       "Honor": 30
+    //     },
+    //     "u": 43,
+    //     "v": 19.666666666666668,
+    //     "uv_rose": 61.333333333333336
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 889
+    //     },
+    //     "attr_value": {
+    //       "Survival": 55,
+    //       "Belonging": 19,
+    //       "Social": 36,
+    //       "Intimacy": 5,
+    //       "Honor": 30
+    //     },
+    //     "u": 37,
+    //     "v": 23.666666666666668,
+    //     "uv_rose": 60.333333333333336
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 15
+    //     },
+    //     "attr_value": {
+    //       "Survival": 50,
+    //       "Belonging": 20,
+    //       "Social": 35,
+    //       "Intimacy": 5,
+    //       "Honor": 30
+    //     },
+    //     "u": 35,
+    //     "v": 23.333333333333332,
+    //     "uv_rose": 59.166666666666664
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 557
+    //     },
+    //     "attr_value": {
+    //       "Survival": 50,
+    //       "Belonging": 20,
+    //       "Social": 29,
+    //       "Intimacy": 5,
+    //       "Honor": 30
+    //     },
+    //     "u": 35,
+    //     "v": 21.333333333333332,
+    //     "uv_rose": 58.166666666666664
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 753
+    //     },
+    //     "attr_value": {
+    //       "Survival": 50,
+    //       "Belonging": 20,
+    //       "Social": 29,
+    //       "Intimacy": 5,
+    //       "Honor": 30
+    //     },
+    //     "u": 35,
+    //     "v": 21.333333333333332,
+    //     "uv_rose": 58.166666666666664
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 765
+    //     },
+    //     "attr_value": {
+    //       "Survival": 50,
+    //       "Belonging": 20,
+    //       "Social": 29,
+    //       "Intimacy": 5,
+    //       "Honor": 30
+    //     },
+    //     "u": 35,
+    //     "v": 21.333333333333332,
+    //     "uv_rose": 58.166666666666664
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 771
+    //     },
+    //     "attr_value": {
+    //       "Survival": 50,
+    //       "Belonging": 20,
+    //       "Social": 29,
+    //       "Intimacy": 5,
+    //       "Honor": 30
+    //     },
+    //     "u": 35,
+    //     "v": 21.333333333333332,
+    //     "uv_rose": 58.166666666666664
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 825
+    //     },
+    //     "attr_value": {
+    //       "Survival": 40,
+    //       "Belonging": 22,
+    //       "Social": 39,
+    //       "Intimacy": 5,
+    //       "Honor": 30
+    //     },
+    //     "u": 31,
+    //     "v": 24.666666666666668,
+    //     "uv_rose": 127.83333333333334
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 849
+    //     },
+    //     "attr_value": {
+    //       "Survival": 40,
+    //       "Belonging": 22,
+    //       "Social": 39,
+    //       "Intimacy": 5,
+    //       "Honor": 30
+    //     },
+    //     "u": 31,
+    //     "v": 24.666666666666668,
+    //     "uv_rose": 127.83333333333334
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 905
+    //     },
+    //     "attr_value": {
+    //       "Survival": 40,
+    //       "Belonging": 22,
+    //       "Social": 39,
+    //       "Intimacy": 5,
+    //       "Honor": 30
+    //     },
+    //     "u": 31,
+    //     "v": 24.666666666666668,
+    //     "uv_rose": 127.83333333333334
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 1177
+    //     },
+    //     "attr_value": {
+    //       "Survival": 40,
+    //       "Belonging": 22,
+    //       "Social": 36,
+    //       "Intimacy": 5,
+    //       "Honor": 30
+    //     },
+    //     "u": 31,
+    //     "v": 23.666666666666668,
+    //     "uv_rose": 127.33333333333334
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 6656
+    //     },
+    //     "attr_value": {
+    //       "Survival": 40,
+    //       "Belonging": 22,
+    //       "Social": 36,
+    //       "Intimacy": 5,
+    //       "Honor": 30
+    //     },
+    //     "u": 31,
+    //     "v": 23.666666666666668,
+    //     "uv_rose": 127.33333333333334
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 223
+    //     },
+    //     "attr_value": {
+    //       "Survival": 40,
+    //       "Belonging": 22,
+    //       "Social": 36,
+    //       "Intimacy": 5,
+    //       "Honor": 30
+    //     },
+    //     "u": 31,
+    //     "v": 23.666666666666668,
+    //     "uv_rose": 127.33333333333334
+    //   },
+    //   {
+    //     "name": "李白",
+    //     "game_info": {
+    //       "day": 1,
+    //       "time": null,
+    //       "frame": 554
+    //     },
+    //     "attr_value": {
+    //       "Survival": 40,
+    //       "Belonging": 22,
+    //       "Social": 36,
+    //       "Intimacy": 5,
+    //       "Honor": 30
+    //     },
+    //     "u": 31,
+    //     "v": 23.666666666666668,
+    //     "uv_rose": 127.33333333333334
+    //   }
+    // ]
+    console.log("fetch", data);
+    handleRender(data)
   }, [targetId])
 
   useIntervalAsync(handleRequest, 3000)
 
+  let preNum = 0;
   const onValueChange = useCallback((value: number[]) => {
-    console.log(value);
+    if (preNum < value[0]) {
+      index.current += 1
+    } else {
+      index.current -= 1
+    }
+    preNum = value[0]
+  }, [preNum])
 
-  }, [])
-
-  return <>
+  return <div className="relative">
     <div ref={graph_container} id="graph_container" />
-    <Slider defaultValue={[100]} max={100} step={1} onValueChange={onValueChange} />
-  </>
+    <div className="flex flex-col justify-center items-center">
+      <Slider defaultValue={[0]} max={100} step={step} onValueChange={onValueChange} />
+      <span className=" text-sm mt-1">Historical Petal</span>
+    </div>
+  </div>
 }
 
 export default memo(RoseGraph)
