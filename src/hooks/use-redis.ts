@@ -17,7 +17,8 @@ export type RedisData = {
 		frame: number;
 	};
 	attr_value: AttrValue;
-	uv_bar: number;
+	u: number;
+	v: number;
 	uv_rose: number;
 };
 

@@ -10,7 +10,6 @@ import RoseGraph from "./rose-graph"
 type Info = {
   label: string,
   icon: LucideIcon,
-  value: number
 }
 
 
@@ -18,81 +17,42 @@ const infos: Info[] = [
   // todo: get & change value from...
   {
     label: 'Honor',
-    icon: Award,
-    value: 2
+    icon: Award
   },
   {
     label: 'Intimacy',
-    icon: Heart,
-    value: 10
+    icon: Heart
   },
   {
     label: 'Social',
-    icon: Users2,
-    value: 40
+    icon: Users2
   },
   {
     label: 'Belonging',
-    icon: ShieldCheck,
-    value: 78
+    icon: ShieldCheck
   },
   {
     label: "Survival",
-    icon: BadgeJapaneseYen,
-    value: 52
+    icon: BadgeJapaneseYen
   }
-]
-
-const color = [
-  "#bfa280",
-  "#ada18a",
-  "#9ba194",
-  "#88a09e",
-  "#769fa8",
 ]
 
 export const Sheet = () => {
   const { redisData } = useRedis()
 
   const [isDisplay, setIsDisplay] = useState(false)
-
   const [attrValues, setAttrValues] = useState<AttrValue>()
-  const [UV, setUV] = useState<number>(0)
-  const [index, setIndex] = useState<number>(0)
-  const [isUVShow, setIsUVShow] = useState<boolean>(false)
+  const [UV, setUV] = useState<{u: number; v: number;}>()
 
   useEffect(() => {
     if (redisData && redisData.length > 0) {
       // console.log(redisData[redisData.length - 1]);
-      setUV(redisData[redisData.length - 1].uv_bar)
+      setUV({u: redisData[redisData.length - 1].u, v: redisData[redisData.length - 1].v})
       setAttrValues(redisData[redisData.length - 1].attr_value)
     }
+    console.log(UV);
+    
   }, [redisData])
-
-  useEffect(() => {
-    if (!UV) return
-    // todo
-    if (UV <= -60) {
-      setIndex(0)
-    } else if (UV <= -20 && UV > -60) {
-      setIndex(1)
-    } else if (UV <= 20 && UV > -20) {
-      setIndex(2)
-    } else if (UV <= 60 && UV > 20) {
-      setIndex(3)
-    } else {
-      setIndex(4)
-    }
-  }, [UV])
-
-
-  const handleUVMouseEnter = useCallback(() => {
-    setIsUVShow(true)
-  }, [])
-
-  const handleUVMouseLeave = useCallback(() => {
-    setIsUVShow(false)
-  }, [])
 
   return (
     <div
@@ -127,44 +87,46 @@ export const Sheet = () => {
                 ))}
               </div>
             </div>
-
             <div className="w-52 px-3 py-1 my-5 text-lg font-semibold bg-gradient-to-r from-[#3B3630]/30 to-[#5E5840]/30">UV ANALYSIS</div>
             <div className="flex justify-between items-center px-6 w-[30vw] h-[34vh] bg-[#1F1F1FB2] rounded-3xl">
               <>
                 <div className="flex flex-col items-center">
                   <p className="text-xl indent-3 tracking-wider">Equilibrium State</p>
-                  <div>
-                    <div></div>
-                    <span>U: Social Conformity</span>
+                  <div className="flex items-center gap-x-1 w-60">
+                    <div className="w-4 h-4 rounded-full bg-[#F1B163]" />
+                    <span className="text-sm">U: Social Conformity</span>
                   </div>
-                  <div>
-                    <div></div>
-                    <span>V: Individual Integrity</span>
+                  <div className="flex items-center gap-x-1 w-60">
+                  <div className="w-4 h-4 rounded-full bg-[#2B83F6]" />
+                    <span className="text-sm">V: Individual Integrity</span>
                   </div>
                   <div className="relative w-4 h-40 border-2 border-[#B0B0B0]">
-                    {/* <div
-                      className="absolute bg-transparent left-[50%] translate-x-[-50%] w-6 h-3 border-2 border-white rounded-[50%] transition-all duration-200"
+                    <div 
+                      className="absolute bottom-0 w-full bg-red-400"
                       style={{
-                        top: `${UV! / 2 + 45}%`,
-                        backgroundColor: color[index!]
+                        height: `${(UV!.u + UV!.v)/2}%`
                       }}
-                      onMouseEnter={handleUVMouseEnter}
-                      onMouseLeave={handleUVMouseLeave}
                     >
-                      <p
-                        className="absolute -top-[11px] left-7 text-lg font-semibold"
-                        style={{ color: color[index!], whiteSpace: "nowrap" }}
-                      >
-                        {UV === 0 ? 'U≈V' : UV < 0 ? 'U>V' : 'U<V'}
-                        <span className="transition-all duration-200" style={{ opacity: isUVShow ? 1 : 0 }}>({UV.toFixed(1)})</span>
-                      </p>
-                    </div> */}
-
-                    <div className="absolute bottom-0 w-full h-[70%] bg-red-400">
-                      <div className="absolute top-0 w-full h-[40%] bg-blue-400"></div>
+                      <div className="absolute top-[50%] left-5 w-28">
+                        {
+                          UV!.u > UV!.v ? 'U > V' : 'U < V'
+                        }
+                      </div>
+                      <div 
+                        className="absolute top-0 w-full bg-[#2B83F6]"
+                        style={{
+                          height: `${UV!.v/(UV!.u + UV!.v)*100}%`
+                        }}
+                      />
+                      
+                      <div
+                        className="absolute bottom-0 w-full bg-[#F1B163]"
+                        style={{
+                          height: `${UV!.u/(UV!.u + UV!.v)*100}%`
+                        }}
+                      />
                     </div>
                   </div>
-
                 </div>
               </>
               <div className="flex flex-col justify-center items-center relative h-full">
