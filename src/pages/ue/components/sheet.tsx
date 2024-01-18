@@ -120,9 +120,7 @@ export const Sheet = () => {
           </div>
           <div className="relative w-[23.5vw] h-[36vh] -ml-10 px-2 flex justify-between items-center bg-[#1F1F1FB2] rounded-3xl">
             <div className=" h-[32vh] ml-2 flex flex-col items-center gap-y-3">
-              <p className="text-xl font-semibold">
-                Equilibrium State
-              </p>
+              <p className="text-xl font-semibold">Equilibrium State</p>
               <UVBar UV={UV} />
             </div>
             <div className=" h-[32vh] flex flex-col items-center gap-y-3">
