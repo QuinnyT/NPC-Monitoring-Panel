@@ -100,8 +100,7 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
       .encode({ x: "frame", y: "uv_rose" })
       .axis("x", {
         line: true,
-        label: true,
-        labelFill: "#fff",
+        labelFilter: () => false,
         lineStroke: "#fff",
         lineLineWidth: "2",
         tickStroke: "#fff",
@@ -134,6 +133,15 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
         }
       })
       .style('fillOpacity', 0.9)
+      .interaction('tooltip', {
+        // render 回调方法返回一个innerHTML 或者 DOM
+        render: (event: any, { title, items }: any) => `<div>
+        <ul>${items.map(
+          (d: any) =>
+            `<li>${d.value}</li>`,
+        )}</ul>
+        </div>`,
+      })
     // .legend({ color: { layout: { flexDirection: 'column', justifyContent: "center" }, 'position': "top" } })
     // .scrollbar({
     //   'x': {
@@ -151,54 +159,54 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
     };
   }, [isDisplay]);
 
-  const handleRender = useCallback(
-    (data: any) => {
-      // data = [...data, {
-      //   name: "123",
-      //   game_info: {
-      //     day: 0,
-      //     time: 0,
-      //     frame: 666,
-      //   },
-      //   attr_value: {
-      //     Survival: 1,
-      //     Belonging: 1,
-      //     Social: 1,
-      //     Intimacy: 1,
-      //     Honor: 1,
-      //   },
-      //   u: 1,
-      //   v: 1,
-      //   uv_rose: 182,
-      // }]
-      if (data.length <= 10) {
-        data = data.map((i: any) => ({ ...i, frame: i.game_info.frame }));
-        setRedisData(data);
-      } else {
-        if (data.length > 110) {
-        } else {
-          setStep(Number((100 / (data.length - 10)).toFixed(1)));
-        }
-        data = data
-          .slice(data.length - index.current)
-          .map((i: any) => ({ ...i, frame: i.game_info.frame }));
-        // data = data.map((i: any) => ({ ...i, frame: i.game_info.frame }))
-        setRedisData(data);
-      }
-      window.requestIdleCallback(() => {
-        graph.current.changeData(data);
-      });
-    },
-    [index.current]
-  );
+  // const handleRender = useCallback(
+  //   (data: any) => {
+  //     // data = [...data, {
+  //     //   name: "123",
+  //     //   game_info: {
+  //     //     day: 0,
+  //     //     time: 0,
+  //     //     frame: 666,
+  //     //   },
+  //     //   attr_value: {
+  //     //     Survival: 1,
+  //     //     Belonging: 1,
+  //     //     Social: 1,
+  //     //     Intimacy: 1,
+  //     //     Honor: 1,
+  //     //   },
+  //     //   u: 1,
+  //     //   v: 1,
+  //     //   uv_rose: 182,
+  //     // }]
+  //     if (data.length <= 10) {
+  //       data = data.map((i: any) => ({ ...i, frame: i.game_info.frame }));
+  //       setRedisData(data);
+  //     } else {
+  //       if (data.length > 110) {
+  //       } else {
+  //         setStep(Number((100 / (data.length - 10)).toFixed(1)));
+  //       }
+  //       data = data
+  //         .slice(data.length - index.current)
+  //         .map((i: any) => ({ ...i, frame: i.game_info.frame }));
+  //       // data = data.map((i: any) => ({ ...i, frame: i.game_info.frame }))
+  //       setRedisData(data);
+  //     }
+  //     window.requestIdleCallback(() => {
+  //       graph.current.changeData(data);
+  //     });
+  //   },
+  //   [index.current]
+  // );
 
-  const handleRequest = useCallback(async () => {
-    let { data } = await getTargetData(targetId);
-    console.log("fetch", data);
-    handleRender(data);
-  }, [targetId]);
+  // const handleRequest = useCallback(async () => {
+  //   let { data } = await getTargetData(targetId);
+  //   console.log("fetch", data);
+  //   handleRender(data);
+  // }, [targetId]);
 
-  useIntervalAsync(handleRequest, 3000);
+  // useIntervalAsync(handleRequest, 3000);
 
   let preNum = 0;
   const onValueChange = useCallback(
