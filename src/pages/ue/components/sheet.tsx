@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
+  HelpCircle,
   ChevronLeft,
   Heart,
   Award,
@@ -54,11 +55,18 @@ export const Sheet = () => {
   useEffect(() => {
     if (redisData && redisData.length > 0) {
       setAttrValues(redisData[redisData.length - 1].attr_value);
-      setUV({
-        u: redisData[redisData.length - 1].u,
-        v: redisData[redisData.length - 1].v,
-      });
+      // setUV({
+      //   u: redisData[redisData.length - 1].u,
+      //   v: redisData[redisData.length - 1].v,
+      // });
     }
+    const timer = setInterval(() => {
+      setUV({
+        u: Math.random() * 100,
+        v: Math.random() * 100,
+      });
+    }, 1000);
+    return () => clearInterval(timer);
   }, [redisData]);
 
   return (
@@ -90,11 +98,14 @@ export const Sheet = () => {
             CURRENT AGENT INFO
           </div>
           <div className="w-[23.5vw] h-[28vh] -ml-10 p-2 px-3 bg-[#1F1F1FB2] rounded-3xl">
-            <div
-              className="my-2 pl-4 mx-auto text-2xl font-semibold"
-              style={{ letterSpacing: "0.625rem" }}
-            >
-              李白
+            <div className="flex justify-between items-center">
+              <div
+                className="my-2 pl-4 text-2xl font-semibold"
+                style={{ letterSpacing: "0.625rem" }}
+              >
+                李白
+              </div>
+              <HelpCircle />
             </div>
             {/* <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">{redisData.length ? redisData[0].name : ""}</div> */}
             <div className="flex flex-col gap-y-2 pl-3">
