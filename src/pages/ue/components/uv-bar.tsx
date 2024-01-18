@@ -1,6 +1,6 @@
 export const UVBar = ({ UV }: { UV: { u: number; v: number } }) => {
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center gap-y-4">
       <div>
         <div className="flex items-center gap-x-1">
           <div className="w-4 h-4 rounded-full bg-[#2B83F6]" />

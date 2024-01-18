@@ -119,13 +119,13 @@ export const Sheet = () => {
             DATA ANALYSIS
           </div>
           <div className="relative flex justify-between items-center px-6 w-[30vw] h-[38vh] bg-[#1F1F1FB2] rounded-3xl">
-            <div className=" h-[35vh] flex flex-col justify-center items-center">
+            <div className=" h-[32vh] flex flex-col items-center gap-y-3">
               <p className="text-xl indent-3 tracking-wider">
                 Equilibrium State
               </p>
               <UVBar UV={UV} />
             </div>
-            <div className=" h-[35vh] flex flex-col justify-center items-center">
+            <div className=" h-[32vh] flex flex-col items-center gap-y-3">
               <p className="text-xl indent-3 tracking-wider">UV Energy</p>
               <RoseGraph isDisplay />
             </div>
