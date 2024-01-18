@@ -108,9 +108,15 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
         title: false,
       })
       .axis('y', {
-        tickFilter: (datum, index, data, Vector) => {
-          console.log(datum, index, data, Vector);
-          return true
+        grid: true,
+        gridStroke: "#fff",
+        gridLineDash: null,
+        gridStrokeOpacity: 1,
+        gridLineWidth: 1,
+        tickFilter: (datum: number) => {
+          if (datum <= 30 || datum >= 130) {
+            return true
+          }
         },
         label: false,
         title: false,
@@ -127,14 +133,14 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
           return graph_color.current[2];
         }
       })
-      // .style('fillOpacity', 0.8)
-      // .legend({ color: { layout: { flexDirection: 'column', justifyContent: "center" }, 'position': "top" } })
-      // .scrollbar({
-      //   'x': {
-      //     value: 1, ratio: 0.7
-      //   }
-      // });
-      .tooltip(false)
+      .style('fillOpacity', 0.9)
+    // .legend({ color: { layout: { flexDirection: 'column', justifyContent: "center" }, 'position': "top" } })
+    // .scrollbar({
+    //   'x': {
+    //     value: 1, ratio: 0.7
+    //   }
+    // });
+    // .tooltip(false)
     // .animate('enter', { type: 'waveIn' })
     // .tooltip({ channel: 'y', valueFormatter: '~s' });
 
@@ -147,6 +153,24 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
 
   const handleRender = useCallback(
     (data: any) => {
+      // data = [...data, {
+      //   name: "123",
+      //   game_info: {
+      //     day: 0,
+      //     time: 0,
+      //     frame: 666,
+      //   },
+      //   attr_value: {
+      //     Survival: 1,
+      //     Belonging: 1,
+      //     Social: 1,
+      //     Intimacy: 1,
+      //     Honor: 1,
+      //   },
+      //   u: 1,
+      //   v: 1,
+      //   uv_rose: 182,
+      // }]
       if (data.length <= 10) {
         data = data.map((i: any) => ({ ...i, frame: i.game_info.frame }));
         setRedisData(data);
@@ -174,7 +198,7 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
     handleRender(data);
   }, [targetId]);
 
-  useIntervalAsync(handleRequest, 1000);
+  useIntervalAsync(handleRequest, 3000);
 
   let preNum = 0;
   const onValueChange = useCallback(
