@@ -74,8 +74,8 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
 
     const chart = new Chart({
       container: graph_container.current,
-      width: 240,
-      height: 240,
+      width: 230,
+      height: 230,
     });
 
     graph.current = chart;
