@@ -9,11 +9,11 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
   const { redisData, setRedisData, targetId } = useRedis();
 
   // todo migrate to zustand state
-  const graph_container = useRef<any>(null)
-  const graph = useRef<any>()
-  const graph_color = useRef<string[]>(['#d2d2d2', '#d29c5d', '#3787d2'])
-  const index = useRef<number>(10)
-  const [step, setStep] = useState<number>(1)
+  const graph_container = useRef<any>(null);
+  const graph = useRef<any>();
+  const graph_color = useRef<string[]>(["#d2d2d2", "#d29c5d", "#3787d2"]);
+  const index = useRef<number>(10);
+  const [step, setStep] = useState<number>(1);
 
   useEffect(() => {
     /**
@@ -77,7 +77,7 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
         tickStroke: "#fff",
         title: false,
       })
-      .axis('y', {
+      .axis("y", {
         grid: true,
         gridStroke: "#fff",
         gridLineDash: null,
@@ -85,7 +85,7 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
         gridLineWidth: 1,
         tickFilter: (datum: number) => {
           if (datum <= 30 || datum >= 130) {
-            return true
+            return true;
           }
         },
         label: false,
@@ -103,16 +103,13 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
           return graph_color.current[2];
         }
       })
-      .style('fillOpacity', 0.9)
-      .interaction('tooltip', {
+      .style("fillOpacity", 0.9)
+      .interaction("tooltip", {
         // render 回调方法返回一个innerHTML 或者 DOM
         render: (event: any, { title, items }: any) => `<div>
-        <ul>${items.map(
-          (d: any) =>
-            `<li>${d.value}</li>`,
-        )}</ul>
+        <ul>${items.map((d: any) => `<li>${d.value}</li>`)}</ul>
         </div>`,
-      })
+      });
     // .legend({ color: { layout: { flexDirection: 'column', justifyContent: "center" }, 'position': "top" } })
     // .scrollbar({
     //   'x': {
@@ -193,7 +190,7 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
 
   return (
     <div className="relative">
-      <div className="flex gap-x-1">
+      <div className="flex flex-wrap justify-between gap-y-1 w-44 mx-auto">
         <div className="flex items-center gap-x-1">
           <div className="w-4 h-4 rounded-full bg-[#D2D2D2]" />
           <span className="text-xs">Surviving</span>
@@ -208,14 +205,14 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
         </div>
       </div>
       <div ref={graph_container} id="graph_container" />
-      <div className="flex flex-col justify-center items-center">
+      <div className="flex flex-col justify-center items-center -mt-4">
         <Slider
           defaultValue={[0]}
           max={100}
           step={step}
           onValueChange={onValueChange}
         />
-        <span className=" text-sm mt-1">Historical Petal</span>
+        <span className="text-sm mt-2">Historical Petal</span>
       </div>
     </div>
   );
