@@ -69,7 +69,7 @@ export const Sheet = () => {
       }}
       className="absolute top-0 z-50 right-11 h-full flex items-center rounded-r-2xl overflow-x-hidden bg-[#6F6F6FCC]/50 backdrop-blur transition-all ease-in-out"
       style={{
-        width: isDisplay ? "35vw" : "3vw",
+        width: isDisplay ? "25vw" : "3vw",
         transitionDuration: isDisplay ? "700ms" : "600ms",
         animationDuration: isDisplay ? "700ms" : "600ms",
       }}
@@ -77,7 +77,7 @@ export const Sheet = () => {
       <Button
         onClick={() => setIsDisplay(!isDisplay)}
         variant="ghost"
-        className="hover:bg-transparent"
+        className="-mt-16 hover:bg-transparent"
       >
         <ChevronLeft
           className="transition-all duration-500 text-white"
@@ -86,10 +86,10 @@ export const Sheet = () => {
       </Button>
       {isDisplay && (
         <div className="flex flex-col h-full py-2 text-white">
-          <div className="my-5 text-2xl font-semibold tracking-wider">
+          <div className="my-4 -ml-8 text-2xl font-semibold tracking-wider">
             CURRENT AGENT INFO
           </div>
-          <div className="w-[30vw] h-[28vh] p-2 px-3 bg-[#1F1F1FB2] rounded-3xl">
+          <div className="w-[23.5vw] h-[28vh] -ml-10 p-2 px-3 bg-[#1F1F1FB2] rounded-3xl">
             <div
               className="my-2 pl-4 mx-auto text-2xl font-semibold"
               style={{ letterSpacing: "0.625rem" }}
@@ -97,16 +97,16 @@ export const Sheet = () => {
               李白
             </div>
             {/* <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">{redisData.length ? redisData[0].name : ""}</div> */}
-            <div className="flex flex-col gap-y-2 pl-8">
+            <div className="flex flex-col gap-y-2 pl-3">
               {infos.map((info) => (
                 <div key={info.label} className="flex items-center gap-x-6">
                   <div className="flex items-center gap-x-2 w-36">
                     <info.icon className="w-8 h-8" />
-                    <span className="text-lg font-semibold">{info.label}</span>
+                    <span className="text-md font-semibold">{info.label}</span>
                   </div>
                   <Progress
                     value={attrValues![info.label]}
-                    className="w-64 transition-all duration-200"
+                    className="w-40 transition-all duration-200"
                   />
                   <span className="w-6 text-lg font-semibold">
                     {attrValues![info.label]}
@@ -115,18 +115,18 @@ export const Sheet = () => {
               ))}
             </div>
           </div>
-          <div className="my-5 text-2xl font-semibold tracking-wider">
+          <div className="mt-16 mb-4 -ml-8 text-2xl font-semibold tracking-wider">
             DATA ANALYSIS
           </div>
-          <div className="relative flex justify-between items-center px-6 w-[30vw] h-[38vh] bg-[#1F1F1FB2] rounded-3xl">
-            <div className=" h-[32vh] flex flex-col items-center gap-y-3">
-              <p className="text-xl indent-3 tracking-wider">
+          <div className="relative w-[23.5vw] h-[36vh] -ml-10 px-2 flex justify-between items-center bg-[#1F1F1FB2] rounded-3xl">
+            <div className=" h-[32vh] ml-2 flex flex-col items-center gap-y-3">
+              <p className="text-xl font-semibold">
                 Equilibrium State
               </p>
               <UVBar UV={UV} />
             </div>
             <div className=" h-[32vh] flex flex-col items-center gap-y-3">
-              <p className="text-xl indent-3 tracking-wider">UV Energy</p>
+              <p className="text-xl font-semibold">Energy Scale</p>
               <RoseGraph isDisplay />
             </div>
           </div>
