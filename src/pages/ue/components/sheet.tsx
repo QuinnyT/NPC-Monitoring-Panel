@@ -3,6 +3,11 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import {
   HelpCircle,
   ChevronLeft,
   Heart,
@@ -75,7 +80,7 @@ export const Sheet = () => {
         e.preventDefault();
         e.stopPropagation();
       }}
-      className="absolute top-0 z-50 right-11 h-full flex items-center rounded-r-2xl overflow-x-hidden bg-[#6F6F6FCC]/50 backdrop-blur transition-all ease-in-out"
+      className="absolute top-0 z-40 right-11 h-full flex items-center rounded-r-2xl overflow-x-hidden bg-[#6F6F6FCC]/50 backdrop-blur transition-all ease-in-out"
       style={{
         width: isDisplay ? "25vw" : "3vw",
         transitionDuration: isDisplay ? "700ms" : "600ms",
@@ -98,28 +103,36 @@ export const Sheet = () => {
             CURRENT AGENT INFO
           </div>
           <div className="w-[23.5vw] h-[28vh] -ml-10 p-2 px-3 bg-[#1F1F1FB2] rounded-3xl">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center mb-2">
               <div
                 className="my-2 pl-4 text-2xl font-semibold"
                 style={{ letterSpacing: "0.625rem" }}
               >
                 李白
               </div>
-              <HelpCircle />
+
+              <HoverCard>
+                <HoverCardTrigger>
+                  <HelpCircle />
+                </HoverCardTrigger>
+                <HoverCardContent side="right" className="relative z-50">
+                  The React Framework – created and maintained by @vercel.
+                </HoverCardContent>
+              </HoverCard>
             </div>
             {/* <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">{redisData.length ? redisData[0].name : ""}</div> */}
-            <div className="flex flex-col gap-y-2 pl-3">
+            <div className="flex flex-col gap-y-3 pl-3">
               {infos.map((info) => (
-                <div key={info.label} className="flex items-center gap-x-6">
+                <div key={info.label} className="flex items-center gap-x-4">
                   <div className="flex items-center gap-x-2 w-36">
-                    <info.icon className="w-8 h-8" />
+                    <info.icon className="w-6 h-6" />
                     <span className="text-md font-semibold">{info.label}</span>
                   </div>
                   <Progress
                     value={attrValues![info.label]}
                     className="w-40 transition-all duration-200"
                   />
-                  <span className="w-6 text-lg font-semibold">
+                  <span className="w-6 text-md font-semibold">
                     {attrValues![info.label]}
                   </span>
                 </div>

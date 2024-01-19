@@ -190,21 +190,21 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
 
   return (
     <div className="relative">
-      <div className="flex flex-wrap justify-between gap-y-1 w-44 mx-auto">
+      <div className="flex flex-wrap justify-between gap-y-1 w-[9.5rem] mx-auto text-[#DBDBDB]">
         <div className="flex items-center gap-x-1">
-          <div className="w-4 h-4 rounded-full bg-[#D2D2D2]" />
+          <div className="w-3 h-3 rounded-full bg-[#D2D2D2]" />
           <span className="text-xs">Surviving</span>
         </div>
         <div className="flex items-center gap-x-1">
-          <div className="w-4 h-4 rounded-full bg-[#2B83F6]" />
+          <div className="w-3 h-3 rounded-full bg-[#2B83F6]" />
           <span className="text-xs">Fulfilling</span>
         </div>
         <div className="flex items-center gap-x-1">
-          <div className="w-4 h-4 rounded-full bg-[#F1B163]" />
+          <div className="w-3 h-3 rounded-full bg-[#F1B163]" />
           <span className="text-xs">Thriving</span>
         </div>
       </div>
-      <div ref={graph_container} id="graph_container" />
+      <div ref={graph_container} id="graph_container" className="-mt-4" />
       <div className="flex flex-col justify-center items-center -mt-4">
         <Slider
           defaultValue={[0]}

@@ -1,13 +1,13 @@
 export const UVBar = ({ UV }: { UV: { u: number; v: number } }) => {
   return (
     <div className="flex flex-col items-center gap-y-4">
-      <div className="flex flex-col gap-y-1">
+      <div className="flex flex-col gap-y-1 -ml-4 text-[#DBDBDB]">
         <div className="flex items-center gap-x-1">
-          <div className="w-4 h-4 rounded-full bg-[#2B83F6]" />
+          <div className="w-3 h-3 rounded-full bg-[#2B83F6]" />
           <span className="text-xs">V : Individual Integrity</span>
         </div>
         <div className="flex items-center gap-x-1">
-          <div className="w-4 h-4 rounded-full bg-[#F1B163]" />
+          <div className="w-3 h-3 rounded-full bg-[#F1B163]" />
           <span className="text-xs">U : Social Conformity</span>
         </div>
       </div>
