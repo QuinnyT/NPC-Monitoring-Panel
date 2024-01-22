@@ -81,7 +81,7 @@ export const Sheet = () => {
           e.preventDefault();
           e.stopPropagation();
         }}
-        className="absolute z-40 top-0 right-11 h-full flex items-center rounded-r-2xl overflow-x-hidden bg-[#6F6F6FCC]/50 backdrop-blur transition-all ease-in-out"
+        className="absolute z-40 top-0 right-0 h-full flex items-center rounded-r-2xl overflow-x-hidden bg-[#6F6F6FCC]/50 backdrop-blur transition-all ease-in-out"
         style={{
           width: isDisplay ? "25vw" : "3vw",
           transitionDuration: isDisplay ? "700ms" : "600ms",
