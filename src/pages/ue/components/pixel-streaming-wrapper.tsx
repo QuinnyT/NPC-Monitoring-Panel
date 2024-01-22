@@ -187,7 +187,7 @@ export const PixelStreamingWrapper = ({
       onClick={handleClickStart}
     >
       <Sheet />
-      <div className="absolute bottom-0 left-0 w-44 h-28 rounded-2xl bg-[#737373B2] z-50 px-2 py-4">
+      <div className="absolute bottom-0 left-0 w-44 h-28 rounded-2xl bg-[#737373B2] z-50 px-2 py-4 select-none">
         <div className="flex flex-col">
           <div className=" text-lg font-semibold mb-2">切回控制</div>
           <div className="text-sm mb-1">1. Alt进入客户端</div>
