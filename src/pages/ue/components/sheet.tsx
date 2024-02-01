@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -53,8 +53,15 @@ const infos: Info[] = [
 export const Sheet = () => {
   const { redisData } = useRedis();
 
+  const box = useRef(null);
   const [isDisplay, setIsDisplay] = useState(false);
-  const [attrValues, setAttrValues] = useState<AttrValue>();
+  const [attrValues, setAttrValues] = useState<AttrValue>({
+    Survival: 0,
+    Belonging: 0,
+    Social: 0,
+    Intimacy: 0,
+    Honor: 0,
+  });
   const [UV, setUV] = useState<{ u: number; v: number }>({ u: 0, v: 0 });
 
   useEffect(() => {
@@ -74,6 +81,18 @@ export const Sheet = () => {
     return () => clearInterval(timer);
   }, [redisData]);
 
+  function handleHoverCardOpenChange(open: boolean) {
+    console.log(box.current);
+    if (!box.current) return
+
+    const ref = box.current as React.HTMLAttributes<HTMLDivElement>
+    if (open) {
+      ref.style!.overflow = "visible";
+    } else {
+      ref.style!.overflow = "hidden";
+    }
+  }
+
   return (
     <div>
       <div
@@ -87,6 +106,7 @@ export const Sheet = () => {
           transitionDuration: isDisplay ? "700ms" : "600ms",
           animationDuration: isDisplay ? "700ms" : "600ms",
         }}
+        ref={box}
       >
         <Button
           onClick={() => setIsDisplay(!isDisplay)}
@@ -103,7 +123,22 @@ export const Sheet = () => {
             <div className="my-4 -ml-8 text-2xl font-semibold tracking-wider">
               CURRENT AGENT INFO
             </div>
-            <div className="w-[23.5vw] h-[28vh] -ml-10 p-2 px-3 bg-[#1F1F1FB2] rounded-3xl">
+            <div className="w-[23.5vw] h-[28vh] relative -ml-10 p-2 px-3 bg-[#1F1F1FB2] rounded-3xl">
+              <HoverCard openDelay={50} onOpenChange={handleHoverCardOpenChange}>
+                <HoverCardTrigger asChild className="absolute top-6 right-10">
+                  <HelpCircle />
+                </HoverCardTrigger>
+                <HoverCardContent
+                  side="right"
+                  className="relative top-20 bg-[#D9D9D9]/90 w-48 h-72"
+                >
+                  <img
+                    className="absolute top-9 right-4 object-cover"
+                    src="/UI_triangle.png"
+                    alt="Maslow"
+                  />
+                </HoverCardContent>
+              </HoverCard>
               <div className="flex justify-between items-center mb-2">
                 <div
                   className="my-2 pl-4 text-2xl font-semibold"
@@ -149,23 +184,6 @@ export const Sheet = () => {
           </div>
         )}
       </div>
-      {isDisplay && (
-        <HoverCard openDelay={50}>
-          <HoverCardTrigger asChild className="absolute z-50 top-24 right-20">
-            <HelpCircle />
-          </HoverCardTrigger>
-          <HoverCardContent
-            side="right"
-            className="relative top-20 bg-[#D9D9D9]/90 w-48 h-72"
-          >
-            <img
-              className="absolute top-9 right-4 object-cover"
-              src="/UI_triangle.png"
-              alt="Maslow"
-            />
-          </HoverCardContent>
-        </HoverCard>
-      )}
     </div>
   );
 };
