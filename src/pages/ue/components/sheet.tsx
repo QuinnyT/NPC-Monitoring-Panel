@@ -71,14 +71,11 @@ export const Sheet = () => {
       //   u: redisData[redisData.length - 1].u,
       //   v: redisData[redisData.length - 1].v,
       // });
-    }
-    const timer = setInterval(() => {
       setUV({
-        u: Math.random() * 100,
-        v: Math.random() * 100,
+        u: redisData[redisData.length - 1].u,
+        v: redisData[redisData.length - 1].v,
       });
-    }, 1000);
-    return () => clearInterval(timer);
+    }
   }, [redisData]);
 
   function handleHoverCardOpenChange(open: boolean) {

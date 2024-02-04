@@ -169,7 +169,6 @@ const RoseGraph = ({ isDisplay }: { isDisplay: boolean }) => {
 
   const handleRequest = useCallback(async () => {
     let { data } = await getTargetData(targetId);
-    console.log("fetch", data);
     handleRender(data);
   }, [targetId]);
 
