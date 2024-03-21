@@ -21,7 +21,7 @@ const DropdownMenuTrigger = React.forwardRef<
   ref={ref}
   className={cn(
     className,
-    "flex justify-center items-center"
+    "flex justify-between items-center"
   )}
   {...props}
   />

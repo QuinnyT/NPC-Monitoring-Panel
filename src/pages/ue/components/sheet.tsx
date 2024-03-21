@@ -3,14 +3,16 @@ import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuPortal, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdownmenu";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+
+// import {
+//   HoverCard,
+//   HoverCardContent,
+//   HoverCardTrigger,
+// } from "@/components/ui/hover-card";
 
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import {
-  HelpCircle,
+  // HelpCircle,
   ChevronLeft,
   Heart,
   Award,
@@ -27,37 +29,42 @@ import { UVBar } from "./uv-bar";
 
 type Info = {
   label: string;
+  name: string;
   icon: LucideIcon;
 };
-
 const infos: Info[] = [
   {
-    label: "Honor",
+    label: "Survival",
+    name: "荣誉",
     icon: Award,
   },
   {
-    label: "Intimacy",
+    label: "Belonging",
+    name: "亲密",
     icon: Heart,
   },
   {
     label: "Social",
+    name: "社交",
     icon: Users2,
   },
   {
-    label: "Belonging",
+    label: "Intimacy",
+    name: "生理",
     icon: ShieldCheck,
   },
   {
-    label: "Survival",
+    label: "Honor",
+    name: "金钱",
     icon: BadgeJapaneseYen,
   },
 ];
+
 
 type HistoryEvent = {
   frame: string;
   name: string;
 };
-
 const historyevent: HistoryEvent[] = [
   {
     frame: "10",
@@ -85,6 +92,21 @@ const historyevent: HistoryEvent[] = [
   },
 ];
 
+type SelectEventList = {
+  name: string;
+};
+const selecteventlist: SelectEventList[] = [
+  {
+    name: "111",
+  },
+  {
+    name: "222",
+  },
+  {
+    name: "333",
+  }
+];
+
 
 export const Sheet = () => {
   const { redisData } = useRedis();
@@ -92,13 +114,15 @@ export const Sheet = () => {
   const box = useRef(null);
   const [isDisplay, setIsDisplay] = useState(false);
   const [attrValues, setAttrValues] = useState<AttrValue>({
-    Survival: 0,
-    Belonging: 0,
-    Social: 0,
-    Intimacy: 0,
-    Honor: 0,
+    Survival: 15,
+    Belonging: 80,
+    Social: 30,
+    Intimacy: 62,
+    Honor: 11,
   });
   const [UV, setUV] = useState<{ u: number; v: number }>({ u: 0, v: 0 });
+  const [selectedEvent, setSelectedEvent] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (redisData && redisData.length > 0) {
@@ -114,18 +138,18 @@ export const Sheet = () => {
     }
   }, [redisData]);
 
-  function handleHoverCardOpenChange(open: boolean) {
-    console.log(box.current);
-    if (!box.current) return
+  // function handleHoverCardOpenChange(open: boolean) {
+  //   console.log(box.current);
+  //   if (!box.current) return
 
-    // eslint-disable-next-line no-undef
-    const ref = box.current as React.HTMLAttributes<HTMLDivElement>
-    if (open) {
-      ref.style!.overflow = "visible";
-    } else {
-      ref.style!.overflow = "hidden";
-    }
-  }
+  //   // eslint-disable-next-line no-undef
+  //   const ref = box.current as React.HTMLAttributes<HTMLDivElement>
+  //   if (open) {
+  //     ref.style!.overflow = "visible";
+  //   } else {
+  //     ref.style!.overflow = "hidden";
+  //   }
+  // }
 
   return (
     <div>
@@ -158,26 +182,38 @@ export const Sheet = () => {
               CURRENT AGENT INFO
             </div>
             
-            <div className="flex w-[23.5vw] h-[28vh]  -ml-10 p-2 px-3 bg-[#1F1F1FB2] rounded-3xl">
-              <div className="w-[10vw] h-full relative">
-                <HoverCard openDelay={50} onOpenChange={handleHoverCardOpenChange}>
-                <HoverCardTrigger asChild className="absolute top-6 right-10">
-                  <HelpCircle />
-                </HoverCardTrigger>
-                <HoverCardContent
-                  side="right"
-                  className="relative top-20 bg-[#D9D9D9]/90 w-48 h-72"
-                >
-                  <img
-                    className="absolute top-9 right-4 object-cover"
-                    src="/UI_triangle.png"
-                    alt="Maslow"
-                  />
-                </HoverCardContent>
-                </HoverCard>
-                <div className="flex justify-between items-center mb-2">
+            <div className="w-[23.5vw] h-[28vh] -ml-10 p-2 px-3 bg-[#1F1F1FB2] rounded-3xl relative">
+              <div className="w-full h-[15%] flex justify-between items-center mb-2">
                 <div
                   className="my-2 pl-4 text-2xl font-semibold"
+                  style={{ letterSpacing: "0.625rem" }}
+                >
+                  李白
+                </div>
+              </div>
+
+              <div className="w-full h-[2%] flex justify-end items-center pr-4">
+                
+                <img 
+                  src="/UI_edit.png"
+                  className="cursor-pointer"
+                  style={{ display: isEditing ? "none" : "block" }}
+                  onClick={() => { setIsEditing(true) }}
+                  alt=""
+                   />
+                
+                
+                <div className="w-3/5 justify-end gap-x-3 items-center" style={{ display: isEditing ? "flex" : "none" }}>
+                  <img className="cursor-pointer" src="/UI_confirm.png" onClick={() => setIsEditing(false)} alt="" />
+                  <img className="cursor-pointer" src="/UI_cancel.png" onClick={() => setIsEditing(false)} alt="" />
+                </div>
+              </div> 
+
+              <div className="flex w-full h-[80%]">
+                <div className="w-[10vw] h-full relative">
+                <div className="flex justify-between items-center mb-2">
+                <div
+                  className="my-1 pl-4 text-xl"
                   style={{ letterSpacing: "0.625rem" }}
                 >
                   事件
@@ -189,33 +225,32 @@ export const Sheet = () => {
                     <DropdownMenu>
                       <DropdownMenuTrigger className="w-[75%] text-[0.7rem] gap-x-4 border border-[#F4F1F1] opacity-50 p-px rounded ">
                         <img src="/UI_insert.png" />
-                        <div>选择输入事件</div>
+                        <div> {selectedEvent != "" ? selectedEvent:"选择输入事件"}</div>
                         <img src="/UI_down.png" />
                       </DropdownMenuTrigger>
                       <DropdownMenuPortal>
-                        <DropdownMenuContent className="w-32 bg-white text-[0.7rem]">
-                          <DropdownMenuItem>
-                            <div>111</div>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <div>222</div>
-                          </DropdownMenuItem>
+                        <DropdownMenuContent className="w-36 bg-white text-[0.7rem] animate-slideDownAndFade">
+                          {selecteventlist.map((item) => (
+                            <DropdownMenuItem key={item.name} onClick={() => setSelectedEvent(item.name)}>
+                              {item.name}
+                            </DropdownMenuItem>
+                          ))}
                         </DropdownMenuContent>
                       </DropdownMenuPortal>
                     </DropdownMenu>
-                    <Button className="w-[20%] h-full rounded text-[0.7rem] bg-[#F4F1F1]">确定</Button>
+                    <Button className="w-[20%] h-full rounded text-[0.7rem] bg-[#F4F1F1]" onClick={() => setSelectedEvent("")}>确定</Button>
                   </div>
               
                   {/* <div className="flex h-1/6 bg-white gap-x-4">
                   </div> */}
-                  <div className="h-4/5  ">
-                    <div className="w-full h-1/5 flex items-center gap-x-4 text-md font-semibold border-y border-white ">
+                  <div className="h-[80%]">
+                    <div className="w-full h-1/4 flex items-center gap-x-4 text-md font-semibold border-y border-white ">
                       <div className="w-[30%] pl-2">帧</div>
                       <div className="w-[70%]">历史事件</div>
                     </div>
-                    <div className="w-full h-[80%] gap-x-4 border-b border-white overflow-y-scroll">
+                    <div className="w-full h-3/4 gap-x-4 border-b border-white overflow-y-scroll">
                     {historyevent.map((event) => (
-                      <div key={event.frame} className="w-full h-1/5 flex items-center gap-x-4 text-md border-b border-white border-opacity-50">
+                      <div key={event.frame} className="w-full h-1/3 flex items-center gap-x-4 text-md border-b border-white border-opacity-50">
                         <div className="w-[30%] pl-2">{event.frame}</div>
                         <div className="w-[70%]">{event.name}</div>
                       </div>
@@ -224,53 +259,47 @@ export const Sheet = () => {
                   </div>
                 </div>
 
-              </div>
-
-              <div className="w-[12vw] relative ml-2">
-              <HoverCard openDelay={50} onOpenChange={handleHoverCardOpenChange}>
-                <HoverCardTrigger asChild className="absolute top-6 right-10">
-                  <HelpCircle />
-                </HoverCardTrigger>
-                <HoverCardContent
-                  side="right"
-                  className="relative top-20 bg-[#D9D9D9]/90 w-48 h-72"
-                >
-                  <img
-                    className="absolute top-9 right-4 object-cover"
-                    src="/UI_triangle.png"
-                    alt="Maslow"
-                  />
-                </HoverCardContent>
-              </HoverCard>
-              <div className="flex justify-between items-center mb-2">
-                <div
-                  className="my-2 pl-4 text-2xl font-semibold"
-                  style={{ letterSpacing: "0.625rem" }}
-                >
-                  李白
+                </div>
+                <div className="w-[12vw] relative ml-2 mt-1">
+                  {/* <HoverCard openDelay={50} onOpenChange={handleHoverCardOpenChange}>
+                    <HoverCardTrigger asChild className="absolute top-6 right-10">
+                      <HelpCircle />
+                    </HoverCardTrigger>
+                    <HoverCardContent
+                      side="right"
+                      className="relative top-20 bg-[#D9D9D9]/90 w-48 h-72"
+                    >
+                      <img
+                        className="absolute top-9 right-4 object-cover"
+                        src="/UI_triangle.png"
+                        alt="Maslow"
+                      />
+                    </HoverCardContent>
+                  </HoverCard> */}
+                  
+                  {/* <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">{redisData.length ? redisData[0].name : ""}</div> */}
+                  <div className="flex flex-col justify-between h-[80%] gap-y-3 pl-3 mt-5 ">
+                    {infos.map((info) => (
+                      <div key={info.label} className="flex items-center ">
+                        <div className="flex items-center gap-x-2 w-26">
+                          <info.icon className="w-6 h-6" />
+                          <span className="text-l w-10">
+                            {info.name}
+                          </span>
+                        </div>
+                        <Progress
+                          value={attrValues![info.label]}
+                          className="mr-2 transition-all duration-200"
+                        />
+                        <span className="mr-4 text-l">
+                          {attrValues![info.label]}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-              {/* <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">{redisData.length ? redisData[0].name : ""}</div> */}
-              <div className="flex flex-col justify-between h-3/4 gap-y-3 pl-3 ">
-                {infos.map((info) => (
-                  <div key={info.label} className="flex items-center gap-x-4">
-                    <div className="flex items-center gap-x-2 w-36">
-                      <info.icon className="w-6 h-6" />
-                      <span className="text-md font-semibold">
-                        {info.label}
-                      </span>
-                    </div>
-                    <Progress
-                      value={attrValues![info.label]}
-                      className="w-36 transition-all duration-200"
-                    />
-                    <span className="w-[12vw] text-md font-semibold">
-                      {attrValues![info.label]}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              </div>
+              
             </div>
             
 
