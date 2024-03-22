@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuPortal, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdownmenu";
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/event-hover-card";
 
 // import {
 //   HoverCard,
@@ -22,10 +22,12 @@ import {
   LucideIcon,
 } from "lucide-react";
 
-import { AttrValue, useRedis } from "@/hooks/use-redis";
+import { AttrValue, RedisData, useRedis } from "@/hooks/use-redis";
 import RoseGraph from "./rose-graph";
 import { UVBar } from "./uv-bar";
+import { text } from "stream/consumers";
 // import { DropdownMenuPortal } from "@radix-ui/react-dropdown-menu";
+
 
 type Info = {
   label: string;
@@ -61,72 +63,101 @@ const infos: Info[] = [
 ];
 
 
-type HistoryEvent = {
-  frame: string;
+type AgentEvent = {
+  frame: number;
   name: string;
 };
-const historyevent: HistoryEvent[] = [
-  {
-    frame: "10",
-    name: "Test1",
-  },
-  {
-    frame: "100",
-    name: "Test2",
-  },
-  {
-    frame: "20",
-    name: "Test3",
-  },
-  {
-    frame: "99",
-    name: "Test4",
-  },
-  {
-    frame: "111",
-    name: "Test5",
-  },
-  {
-    frame: "151",
-    name: "Test6",
-  },
-];
 
 type SelectEventList = {
   name: string;
+  fullcontent: string;
 };
-const selecteventlist: SelectEventList[] = [
+const selectEventList: SelectEventList[] = [
   {
-    name: "111",
+    name: "talk to others",
+    fullcontent: "talk with someone",
   },
   {
-    name: "222",
+    name: "quarrel to others",
+    fullcontent: "quarreling with someone",
   },
   {
-    name: "333",
-  }
+    name: "buy snacks",
+    fullcontent: "buy wine and pay the money",
+  },
+  {
+    name: "see the view at tower",
+    fullcontent: "see the view in the yellow crane tower",
+  },
+  {
+    name: "dine out at tower",
+    fullcontent: "dine out at tower",
+  },
+  
 ];
 
 
 export const Sheet = () => {
-  const { redisData } = useRedis();
+  const [attrValues, setAttrValues] = useState<AttrValue>({
+    Survival: 0,
+    Belonging: 0,
+    Social: 0,
+    Intimacy: 0,
+    Honor: 0,
+  });
+  const [historyEvent, setHistoryEvent] = useState<AgentEvent[]>([
+    {
+      frame: 10,
+      name: "Test1",
+    },
+    {
+      frame: 100,
+      name: "Test2",
+    }
+  ])
+  const [currentData, setCurrentData] = useState<RedisData[]>([
+    {
+      name: "",
+      game_info: {
+        day: 0,
+        time: "",
+        frame: 0
+      },
+      attr_value: attrValues,
+      u: 0,
+      v: 0,
+      uv_rose: 0,
+      action: ""
+    }
+  ])
+  const [isClicking, setIsClicking] = useState<number>(-1);
+  // const [currentIndex, setCurrentIndex] = useState<number>(-1);
+  // const [attrList, setAttrList] = useState<AttrValue[]>([
+  //   {
+  //     Survival: 0,
+  //     Belonging: 0,
+  //     Social: 0,
+  //     Intimacy: 0,
+  //     Honor: 0,
+  //   }
+  // ])
 
+  const { redisData } = useRedis();
   const box = useRef(null);
   const [isDisplay, setIsDisplay] = useState(false);
-  const [attrValues, setAttrValues] = useState<AttrValue>({
-    Survival: 15,
-    Belonging: 80,
-    Social: 30,
-    Intimacy: 62,
-    Honor: 11,
-  });
+  
   const [UV, setUV] = useState<{ u: number; v: number }>({ u: 0, v: 0 });
+
   const [selectedEvent, setSelectedEvent] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [editingAttrValues, setEditingAttrValues] = useState<AttrValue>({...attrValues}); 
+  // const [showingData, setShowingAttrValues] = useState<ShowingAttrValues>({...attrValues, trend: "up", diff: 0}); 
 
   useEffect(() => {
+    console.log("redisData", redisData)
     if (redisData && redisData.length > 0) {
-      setAttrValues(redisData[redisData.length - 1].attr_value);
+      // setCurrentData(redisData);
+      // setAttrValues(redisData[redisData.length - 1].attr_value);
       // setUV({
       //   u: redisData[redisData.length - 1].u,
       //   v: redisData[redisData.length - 1].v,
@@ -135,8 +166,90 @@ export const Sheet = () => {
         u: redisData[redisData.length - 1].u,
         v: redisData[redisData.length - 1].v,
       });
+      
+      const historyEvent: AgentEvent[] = [];
+      const showingData = JSON.parse(JSON.stringify(redisData));
+
+      
+      for (let index = 0; index < redisData.length; index++) {
+        historyEvent.push({
+          name: redisData[index].action,
+          frame: redisData[index].game_info.frame
+        })
+        
+        // 改写attr数据（添加差值）
+        let attr = redisData[index].attr_value;
+        if( index == 0 ) {
+          let newAttr: any = {
+            Survival: {},
+            Belonging: {},
+            Social: {},
+            Intimacy: {},
+            Honor: {}
+          };
+          for(let key in attr) {
+            newAttr[key] = {
+              value: attr[key],
+              trend: "none",
+              diff: 0
+            }
+          }
+          showingData[index].attr_value = newAttr
+        }
+        else {
+          let newAttr: any = {
+            Survival: {},
+            Belonging: {},
+            Social: {},
+            Intimacy: {},
+            Honor: {}
+          };
+          for(let key in attr) {
+            const thisValue = attr[key];
+            const frontValue = redisData[index-1].attr_value[key].value
+            const diff = thisValue - frontValue;
+            let trend = "";
+            if( diff > 0 ) {
+              trend = "plus";
+            }
+            else if ( diff < 0 ) {
+              trend = "minus";
+            }
+            else {
+              trend = "none";
+            }
+            newAttr[key] = {
+              value: thisValue,
+              trend: trend,
+              diff: Math.abs(diff),
+            }
+          }
+          showingData[index].attr_value = newAttr
+        }
+      }
+      // console.log("redisData", redisData)
+      setHistoryEvent(historyEvent);
+      // setAttrList(showingData);
+      setCurrentData(showingData);
+      setAttrValues(showingData[showingData.length - 1].attr_value);
     }
   }, [redisData]);
+
+  console.log("currentData", currentData)
+  // useEffect(() => {
+  //   console.log("currentData", currentData)
+  //   console.log("attrValues", attrValues)
+  // }, [currentData, attrValues]);
+
+  // useEffect(() => {
+  //   if( isClicking ) {
+  //     setAttrValues(attrList[isClicking]);
+  //   }
+  //   else {
+  //     setAttrValues(attrList[attrList.length - 1]);
+  //   }
+  //   console.log("attrList", attrList)
+  // }, [isClicking, attrList]);
 
   // function handleHoverCardOpenChange(open: boolean) {
   //   console.log(box.current);
@@ -151,16 +264,83 @@ export const Sheet = () => {
   //   }
   // }
 
+  // let attrNodes: Array<any> = [];
+  
+  type AttrNode = {
+    Survival: any;
+    Belonging: any;
+    Social: any;
+    Intimacy: any;
+    Honor: any;
+    [key: string]: any;
+  };
+  const attrNodes: AttrNode = {
+    Survival: null,
+    Belonging: null,
+    Social: null,
+    Intimacy: null,
+    Honor: null,
+  };
+
+  const clickItemRef = useRef(null);
+
+  function handleEdit() {
+    setIsEditing(true);
+    for (let key in attrNodes) {
+      attrNodes[key].innerText = attrValues[key];
+    }
+  }
+
+  function handleInput(e: any, label: string) {
+    let value = e.target.innerText;
+    value = value.replace(/[^\d]/g,'');
+    if( value < 0 || value > 100) {
+      return
+    }
+    editingAttrValues[label] = value;
+    setEditingAttrValues(editingAttrValues);
+  }
+
+  function handleConfirm() {
+    let key: keyof AttrValue;
+    for (key in attrValues) {
+      attrValues[key] = editingAttrValues[key];
+    }
+    setAttrValues(attrValues);
+    setIsEditing(false);
+  }
+
+  function handleCancel() {
+    setIsEditing(false);
+  }
+
+  function clickHistoryEvent(event: any, index: number) {
+    console.log("index", index)
+    setIsClicking(index);
+  }
+
+
+  function handleClick(event: any) {
+    // console.log("event", event);
+    event.preventDefault();
+    event.stopPropagation();
+    if( !clickItemRef.current.contains(event.target) ) {
+      setIsClicking(-1)
+    }
+  }
+  
+  function insertNewEvent() {
+    console.log("selectedEvent", selectedEvent)
+    setSelectedEvent("");
+  }
+
   return (
     <div>
       <div
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
+        onClick={(e) => handleClick(e)}
         className="absolute z-40 top-0 right-0 h-full flex items-center rounded-r-2xl overflow-x-hidden bg-[#6F6F6FCC]/50 backdrop-blur transition-all ease-in-out"
         style={{
-          width: isDisplay ? "25vw" : "3vw",
+          width: isDisplay ? "26vw" : "3vw",
           transitionDuration: isDisplay ? "700ms" : "600ms",
           animationDuration: isDisplay ? "700ms" : "600ms",
         }}
@@ -182,7 +362,7 @@ export const Sheet = () => {
               CURRENT AGENT INFO
             </div>
             
-            <div className="w-[23.5vw] h-[28vh] -ml-10 p-2 px-3 bg-[#1F1F1FB2] rounded-3xl relative">
+            <div className="w-[24.5vw] h-[28vh] -ml-10 p-2 px-3 bg-[#1F1F1FB2] rounded-3xl relative">
               <div className="w-full h-[15%] flex justify-between items-center mb-2">
                 <div
                   className="my-2 pl-4 text-2xl font-semibold"
@@ -198,14 +378,14 @@ export const Sheet = () => {
                   src="/UI_edit.png"
                   className="cursor-pointer"
                   style={{ display: isEditing ? "none" : "block" }}
-                  onClick={() => { setIsEditing(true) }}
+                  onClick={() => { handleEdit() }}
                   alt=""
                    />
                 
                 
                 <div className="w-3/5 justify-end gap-x-3 items-center" style={{ display: isEditing ? "flex" : "none" }}>
-                  <img className="cursor-pointer" src="/UI_confirm.png" onClick={() => setIsEditing(false)} alt="" />
-                  <img className="cursor-pointer" src="/UI_cancel.png" onClick={() => setIsEditing(false)} alt="" />
+                  <img className="cursor-pointer" src="/UI_confirm.png" onClick={() => handleConfirm()} alt="" />
+                  <img className="cursor-pointer" src="/UI_cancel.png" onClick={() => handleCancel()} alt="" />
                 </div>
               </div> 
 
@@ -229,16 +409,21 @@ export const Sheet = () => {
                         <img src="/UI_down.png" />
                       </DropdownMenuTrigger>
                       <DropdownMenuPortal>
-                        <DropdownMenuContent className="w-36 bg-white text-[0.7rem] animate-slideDownAndFade">
-                          {selecteventlist.map((item) => (
-                            <DropdownMenuItem key={item.name} onClick={() => setSelectedEvent(item.name)}>
+                        <DropdownMenuContent className="w-full bg-white text-[0.7rem] rounded border-x border-b border-[#C3C3C3] border-opacity-50 animate-slideDownAndFade">
+                          {selectEventList.map((item) => (
+                            <DropdownMenuItem
+                              className="h-7 bg-[#262526] text-white hover:bg-[#C3C3C3] hover:text-[#333333] border-b border-[#C3C3C3]"
+                              key={item.name}
+                              onClick={() => setSelectedEvent(item.name)}
+                            >
                               {item.name}
                             </DropdownMenuItem>
+                            
                           ))}
                         </DropdownMenuContent>
                       </DropdownMenuPortal>
                     </DropdownMenu>
-                    <Button className="w-[20%] h-full rounded text-[0.7rem] bg-[#F4F1F1]" onClick={() => setSelectedEvent("")}>确定</Button>
+                    <Button className="w-[20%] h-full rounded text-[0.7rem] bg-[#F4F1F1]" onClick={() => insertNewEvent()}>确定</Button>
                   </div>
               
                   {/* <div className="flex h-1/6 bg-white gap-x-4">
@@ -248,12 +433,22 @@ export const Sheet = () => {
                       <div className="w-[30%] pl-2">帧</div>
                       <div className="w-[70%]">历史事件</div>
                     </div>
-                    <div className="w-full h-3/4 gap-x-4 border-b border-white overflow-y-scroll">
-                    {historyevent.map((event) => (
-                      <div key={event.frame} className="w-full h-1/3 flex items-center gap-x-4 text-md border-b border-white border-opacity-50">
-                        <div className="w-[30%] pl-2">{event.frame}</div>
-                        <div className="w-[70%]">{event.name}</div>
-                      </div>
+                    <div ref={clickItemRef} className="w-full h-3/4 gap-x-4 border-b border-white overflow-y-scroll">
+                    {historyEvent.map((event, index) => (
+                      <HoverCard openDelay={400} closeDelay={100}>
+                        <HoverCardTrigger className="cursor-pointer" >
+                          <div
+                            key={event.frame}
+                            className={`${ index == isClicking ? 'text-[#D1CDAC]' : 'text-white' } w-full h-1/3 flex items-center gap-x-4 text-md border-b border-white border-opacity-50 hover:text-[#D1CDAC]`}
+                            onClick={(e) => clickHistoryEvent(e, index)}
+                          >
+                            <div className="w-[30%] pl-2">{event.frame}</div>
+                            <div className="w-[70%] truncate">{event.name}</div>
+                          </div>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="z-50 w-full h-1/3 bg-[#DBDBDB] text-[#262623]">{event.name}</HoverCardContent>
+                      </HoverCard>
+                      
                     ))}
                     </div>
                   </div>
@@ -278,7 +473,7 @@ export const Sheet = () => {
                   </HoverCard> */}
                   
                   {/* <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">{redisData.length ? redisData[0].name : ""}</div> */}
-                  <div className="flex flex-col justify-between h-[80%] gap-y-3 pl-3 mt-5 ">
+                  <div className="flex flex-col justify-between h-[80%] gap-y-3 pl-3 mt-5">
                     {infos.map((info) => (
                       <div key={info.label} className="flex items-center ">
                         <div className="flex items-center gap-x-2 w-26">
@@ -288,12 +483,34 @@ export const Sheet = () => {
                           </span>
                         </div>
                         <Progress
-                          value={attrValues![info.label]}
+                          value={isClicking >= 0 ? currentData[isClicking].attr_value![info.label].value : attrValues![info.label].value}
+                          // value={isClicking >= 0 ? currentData[isClicking].attr_value![info.label] : attrValues![info.label]}
+                          // value={attrValues![info.label]}
                           className="mr-2 transition-all duration-200"
                         />
-                        <span className="mr-4 text-l">
-                          {attrValues![info.label]}
-                        </span>
+                        <div
+                          className="w-8 h-6 px-1 text-l justify-center items-center bg-transparent border border-[#F4F1F1] border-opacity-0"
+                          style={{ display: isEditing ? "none" : "flex"}}
+                        >
+                          {isClicking >= 0 ? currentData[isClicking].attr_value![info.label].value : attrValues![info.label].value}
+                          {/* {isClicking >= 0 ? currentData[isClicking].attr_value![info.label] : attrValues![info.label]} */}
+                          {/* {attrValues![info.label]} */}
+                        </div>
+                        <div
+                          className="w-8 h-6 px-1 text-l flex justify-center items-center bg-transparent border  border-[#F4F1F1] rounded"
+                          style={{ display: isEditing ? "flex" : "none"}}
+                          ref={node => {  attrNodes[info.label] = node }}
+                          contentEditable
+                          onInput={(e) => {handleInput(e, info.label)}}
+                        >
+                        </div>
+                        <div
+                          className="w-8 h-6 bg-white flex justify-center items-center text-xs"
+                          style={{ opacity: isEditing ? 0 : 1 }}
+                        >
+                          <img src="/UI_plus.png" alt="" />
+                          8
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -307,7 +524,7 @@ export const Sheet = () => {
             <div className="mt-16 mb-4 -ml-8 text-2xl font-semibold tracking-wider">
               DATA ANALYSIS
             </div>
-            <div className="relative w-[23.5vw] h-[36vh] -ml-10 px-2 flex justify-between items-center bg-[#1F1F1FB2] rounded-3xl">
+            <div className="relative w-[24.5vw] h-[36vh] -ml-10 px-2 flex justify-between items-center bg-[#1F1F1FB2] rounded-3xl">
               <div className=" h-[32vh] ml-2 flex flex-col items-center gap-y-3">
                 <p className="text-xl font-semibold">Equilibrium State</p>
                 <UVBar UV={UV} />

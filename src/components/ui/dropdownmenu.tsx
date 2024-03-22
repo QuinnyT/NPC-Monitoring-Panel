@@ -61,7 +61,7 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
   ref={ref}
   className={cn(
-    "flex justify-center hover:bg-black hover:text-white",
+    "flex justify-center items-center",
     className
   )}
   {...props}

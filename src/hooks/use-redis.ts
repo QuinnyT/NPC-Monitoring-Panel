@@ -20,6 +20,7 @@ export type RedisData = {
 	u: number;
 	v: number;
 	uv_rose: number;
+	action: string;
 };
 
 interface useRedisStore {
