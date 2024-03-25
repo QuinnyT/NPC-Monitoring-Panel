@@ -96,14 +96,67 @@ const selectEventList: SelectEventList[] = [
   
 ];
 
+type NewInfoValue = {
+  value: number,
+  trend: string,
+  diff: number
+}
+type NewAttrValue = {
+  Survival: NewInfoValue;
+	Belonging: NewInfoValue;
+	Social: NewInfoValue;
+	Intimacy: NewInfoValue;
+	Honor: NewInfoValue;
+  [key: string]: NewInfoValue;
+}
+type NewRedisData = {
+	name: string;
+	game_info: {
+		day: number;
+		time: string;
+		frame: number;
+	};
+	attr_value: NewAttrValue;
+	u: number;
+	v: number;
+	uv_rose: number;
+	action: string;
+};
 
 export const Sheet = () => {
-  const [attrValues, setAttrValues] = useState<AttrValue>({
-    Survival: 0,
-    Belonging: 0,
-    Social: 0,
-    Intimacy: 0,
-    Honor: 0,
+  // const [attrValues, setAttrValues] = useState<AttrValue>({
+  //   Survival: 0,
+  //   Belonging: 0,
+  //   Social: 0,
+  //   Intimacy: 0,
+  //   Honor: 0,
+  // });
+  const [attrValues, setAttrValues] = useState<NewAttrValue>({
+    Survival: {
+      value: 0,
+      trend: "none",
+      diff: 0
+    },
+    Belonging: {
+      value: 0,
+      trend: "none",
+      diff: 0
+    },
+    Social: {
+      value: 0,
+      trend: "none",
+      diff: 0
+    },
+    Intimacy: {
+      value: 0,
+      trend: "none",
+      diff: 0
+    },
+    Honor: {
+      value: 0,
+      trend: "none",
+      diff: 0
+    },
   });
   const [historyEvent, setHistoryEvent] = useState<AgentEvent[]>([
     {
@@ -115,7 +168,22 @@ export const Sheet = () => {
       name: "Test2",
     }
   ])
-  const [currentData, setCurrentData] = useState<RedisData[]>([
+  // const [currentData, setCurrentData] = useState<RedisData[]>([
+  //   {
+  //     name: "",
+  //     game_info: {
+  //       day: 0,
+  //       time: "",
+  //       frame: 0
+  //     },
+  //     attr_value: attrValues,
+  //     u: 0,
+  //     v: 0,
+  //     uv_rose: 0,
+  //     action: ""
+  //   }
+  // ])
+  const [currentData, setCurrentData] = useState<NewRedisData[]>([
     {
       name: "",
       game_info: {
@@ -150,7 +218,8 @@ export const Sheet = () => {
 
   const [selectedEvent, setSelectedEvent] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [editingAttrValues, setEditingAttrValues] = useState<AttrValue>({...attrValues}); 
+  const [editingAttrValues, setEditingAttrValues] = useState<NewAttrValue>({...attrValues});
+  // const [editingAttrValues, setEditingAttrValues] = useState<AttrValue>({...attrValues}); 
   // const [showingData, setShowingAttrValues] = useState<ShowingAttrValues>({...attrValues, trend: "up", diff: 0}); 
 
   useEffect(() => {
@@ -206,8 +275,11 @@ export const Sheet = () => {
           };
           for(let key in attr) {
             const thisValue = attr[key];
-            const frontValue = redisData[index-1].attr_value[key].value
+            const frontValue = redisData[index-1].attr_value[key]
             const diff = thisValue - frontValue;
+            console.log("thisValue", thisValue)
+            console.log("frontValue", frontValue)
+            console.log("diff", diff)
             let trend = "";
             if( diff > 0 ) {
               trend = "plus";
@@ -287,7 +359,7 @@ export const Sheet = () => {
   function handleEdit() {
     setIsEditing(true);
     for (let key in attrNodes) {
-      attrNodes[key].innerText = attrValues[key];
+      attrNodes[key].innerText = attrValues[key].value;
     }
   }
 
@@ -297,14 +369,14 @@ export const Sheet = () => {
     if( value < 0 || value > 100) {
       return
     }
-    editingAttrValues[label] = value;
+    editingAttrValues[label].value = value;
     setEditingAttrValues(editingAttrValues);
   }
 
   function handleConfirm() {
     let key: keyof AttrValue;
     for (key in attrValues) {
-      attrValues[key] = editingAttrValues[key];
+      attrValues[key].value = editingAttrValues[key].value;
     }
     setAttrValues(attrValues);
     setIsEditing(false);
@@ -314,7 +386,7 @@ export const Sheet = () => {
     setIsEditing(false);
   }
 
-  function clickHistoryEvent(event: any, index: number) {
+  function clickHistoryEvent(index: number) {
     console.log("index", index)
     setIsClicking(index);
   }
@@ -372,7 +444,7 @@ export const Sheet = () => {
                 </div>
               </div>
 
-              <div className="w-full h-[2%] flex justify-end items-center pr-4">
+              <div className="w-full h-[2%] flex justify-end items-center pr-12">
                 
                 <img 
                   src="/UI_edit.png"
@@ -440,7 +512,7 @@ export const Sheet = () => {
                           <div
                             key={event.frame}
                             className={`${ index == isClicking ? 'text-[#D1CDAC]' : 'text-white' } w-full h-1/3 flex items-center gap-x-4 text-md border-b border-white border-opacity-50 hover:text-[#D1CDAC]`}
-                            onClick={(e) => clickHistoryEvent(e, index)}
+                            onClick={() => clickHistoryEvent(index)}
                           >
                             <div className="w-[30%] pl-2">{event.frame}</div>
                             <div className="w-[70%] truncate">{event.name}</div>
@@ -474,45 +546,48 @@ export const Sheet = () => {
                   
                   {/* <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">{redisData.length ? redisData[0].name : ""}</div> */}
                   <div className="flex flex-col justify-between h-[80%] gap-y-3 pl-3 mt-5">
-                    {infos.map((info) => (
-                      <div key={info.label} className="flex items-center ">
-                        <div className="flex items-center gap-x-2 w-26">
-                          <info.icon className="w-6 h-6" />
-                          <span className="text-l w-10">
-                            {info.name}
-                          </span>
+                    {infos.map((info) => {
+                      let showingAttr = isClicking >= 0 ? currentData[isClicking].attr_value![info.label] : attrValues![info.label];
+                      return (
+                        <div key={info.label} className="flex items-center ">
+                          <div className="flex items-center gap-x-2 w-26">
+                            <info.icon className="w-6 h-6" />
+                            <span className="text-l w-10">
+                              {info.name}
+                            </span>
+                          </div>
+                          <Progress
+                            value={isClicking >= 0 ? showingAttr.value : showingAttr.value}
+                            // value={isClicking >= 0 ? currentData[isClicking].attr_value![info.label] : attrValues![info.label]}
+                            // value={attrValues![info.label]}
+                            className="w-24 mr-2 transition-all duration-200"
+                          />
+                          <div
+                            className="w-8 h-6 px-1 text-l justify-center items-center bg-transparent border border-[#F4F1F1] border-opacity-0"
+                            style={{ display: isEditing ? "none" : "flex"}}
+                          >
+                            {isClicking >= 0 ? showingAttr.value : showingAttr.value}
+                            {/* {isClicking >= 0 ? currentData[isClicking].attr_value![info.label] : attrValues![info.label]} */}
+                            {/* {attrValues![info.label]} */}
+                          </div>
+                          <div
+                            className="w-8 h-6 px-1 text-l flex justify-center items-center bg-transparent border  border-[#F4F1F1] rounded"
+                            style={{ display: isEditing ? "flex" : "none"}}
+                            ref={node => {  attrNodes[info.label] = node }}
+                            contentEditable
+                            onInput={(e) => {handleInput(e, info.label)}}
+                          >
+                          </div>
+                          <div
+                            className="w-8 h-6  flex justify-center items-center text-xs"
+                            style={{ opacity: !isEditing && showingAttr.diff != 0 ? 1 : 0 }}
+                          >
+                            <img src={'/UI_' + `${isClicking >= 0 ? showingAttr.trend : showingAttr.trend}`+ '.png'  } alt="" />
+                            {isClicking >= 0 ? showingAttr.diff : showingAttr.diff}
+                          </div>
                         </div>
-                        <Progress
-                          value={isClicking >= 0 ? currentData[isClicking].attr_value![info.label].value : attrValues![info.label].value}
-                          // value={isClicking >= 0 ? currentData[isClicking].attr_value![info.label] : attrValues![info.label]}
-                          // value={attrValues![info.label]}
-                          className="mr-2 transition-all duration-200"
-                        />
-                        <div
-                          className="w-8 h-6 px-1 text-l justify-center items-center bg-transparent border border-[#F4F1F1] border-opacity-0"
-                          style={{ display: isEditing ? "none" : "flex"}}
-                        >
-                          {isClicking >= 0 ? currentData[isClicking].attr_value![info.label].value : attrValues![info.label].value}
-                          {/* {isClicking >= 0 ? currentData[isClicking].attr_value![info.label] : attrValues![info.label]} */}
-                          {/* {attrValues![info.label]} */}
-                        </div>
-                        <div
-                          className="w-8 h-6 px-1 text-l flex justify-center items-center bg-transparent border  border-[#F4F1F1] rounded"
-                          style={{ display: isEditing ? "flex" : "none"}}
-                          ref={node => {  attrNodes[info.label] = node }}
-                          contentEditable
-                          onInput={(e) => {handleInput(e, info.label)}}
-                        >
-                        </div>
-                        <div
-                          className="w-8 h-6 bg-white flex justify-center items-center text-xs"
-                          style={{ opacity: isEditing ? 0 : 1 }}
-                        >
-                          <img src="/UI_plus.png" alt="" />
-                          8
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               </div>
