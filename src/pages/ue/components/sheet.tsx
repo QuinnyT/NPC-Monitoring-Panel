@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuPortal, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdownmenu";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/event-hover-card";
 
+import MyChart, { MyChartOption } from "@/components/ui/charts";
 // import {
 //   HoverCard,
 //   HoverCardContent,
@@ -218,9 +219,430 @@ export const Sheet = () => {
 
   const [selectedEvent, setSelectedEvent] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [editingAttrValues, setEditingAttrValues] = useState<NewAttrValue>({...attrValues});
+  const [editingAttrValues, setEditingAttrValues] = useState<NewAttrValue>({
+    Survival: {
+      value: 0,
+      trend: "none",
+      diff: 0
+    },
+    Belonging: {
+      value: 0,
+      trend: "none",
+      diff: 0
+    },
+    Social: {
+      value: 0,
+      trend: "none",
+      diff: 0
+    },
+    Intimacy: {
+      value: 0,
+      trend: "none",
+      diff: 0
+    },
+    Honor: {
+      value: 0,
+      trend: "none",
+      diff: 0
+    },
+  });
   // const [editingAttrValues, setEditingAttrValues] = useState<AttrValue>({...attrValues}); 
   // const [showingData, setShowingAttrValues] = useState<ShowingAttrValues>({...attrValues, trend: "up", diff: 0}); 
+
+  const funnelChartOption: MyChartOption = {
+    // title: {
+    //   text: 'Funnel'
+    // },
+    
+    tooltip: {
+      show: false
+      // trigger: 'item',
+      // formatter: '{a} <br/>{b} : {c}%'
+    },
+    toolbox: {
+      // feature: {
+      //   dataView: { readOnly: false },
+      //   restore: {},
+      //   saveAsImage: {}
+      // }
+    },
+    legend: {
+      data: ['活着', '活得好', '活得有意义'],
+      show: false
+    },
+    series: [
+      {
+        name: 'Expected',
+        type: 'funnel',
+        left: '20%',
+        top: '5%',
+        width: '60%',
+        height: '90%',
+        label: {
+          formatter: '{b}',
+          position: 'inside'
+        },
+        labelLine: {
+          show: false
+        },
+        itemStyle: {
+          opacity: 0.7,
+          // color: {
+          //   type: 'linear',
+          //   x: 0,
+          //   y: 0,
+          //   x2: 0,
+          //   y2: 1,
+          // }
+        },
+        emphasis: {
+          label: {
+            position: 'inside',
+            // formatter: '{b}Expected: {c}%'
+          }
+        },
+        sort: 'ascending',
+        data: [
+          // { value: 100, name: '活着' },
+          // { value: 90, name: '活着' },
+          // { value: 80, name: '活着' },
+          // { value: 70, name: '活着' },
+          // { value: 60, name: '活得好' },
+          // { value: 50, name: '活得好' },
+          // { value: 40, name: '活得好' },
+          // { value: 30, name: '活得好' },
+          // { value: 20, name: '活得有意义' },
+          // { value: 10, name: '活得有意义' },
+          // { value: 33.6, name: '活得有意义', itemStyle: { color: '#867A6A'}},
+          // { value: 66.6, name: '活得好', itemStyle: { color: '#B5B5A9'}},
+          // { value: 100, name: '活着', itemStyle: { color: '#D0D0CE'}},
+          // { value: 33.6, name: '活得有意义', itemStyle: { color: 'rgba(134, 122, 106, 0)', borderWidth: 1}},
+          // { value: 66.6, name: '活得好', itemStyle: { color: 'rgba(181, 181, 169, 0)', borderWidth: 1}},
+          // { value: 100, name: '活着', itemStyle: { color: 'rgba(208, 208, 206, 0)', borderWidth: 1}},
+          { 
+            value: 33.3,
+            name: '活得有意义',
+            itemStyle: {
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 1,
+                x2: 0,
+                y2: 0,
+                colorStops: [{
+                    offset: 0, color: 'rgba(134, 122, 106, 0)'
+                }, {
+                    offset: 0.5, color: 'rgba(134, 122, 106, 0)'
+                }, {
+                  offset: 0.5, color: 'rgba(134, 122, 106, 0)'
+                }, {
+                   offset: 1, color: 'rgba(134, 122, 106, 0)'
+                }],
+              },
+              borderWidth: 1
+          }},
+          { 
+            value: 66.6,
+            name: '活得好',
+            itemStyle: {
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [{
+                    offset: 0, color: 'rgba(181, 181, 169, 0)'
+                }, {
+                    offset: 0.4, color: 'rgba(181, 181, 169, 0)'
+                }, {
+                  offset: 0.4, color: 'rgba(181, 181, 169, 1)'
+                }, {
+                   offset: 1, color: 'rgba(181, 181, 169, 1)'
+                }],
+              },
+              borderWidth: 1
+          }},
+          { 
+            value: 100,
+            name: '活着',
+            itemStyle: {
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [{
+                    offset: 0, color: 'rgba(208, 208, 206, 1)'
+                }, {
+                    offset: 0.5, color: 'rgba(208, 208, 206, 1)'
+                }, {
+                  offset: 0.5, color: 'rgba(208, 208, 206, 1)'
+                }, {
+                   offset: 1, color: 'rgba(208, 208, 206, 1)'
+                }],
+              },
+              borderWidth: 1
+          }},
+        ]
+      },
+    ]
+  } 
+  // const lineChartOption: MyChartOption = {
+  //   // title: {
+  //   //   text: 'Stacked Line'
+  //   // },
+  //   tooltip: {
+  //     // trigger: 'axis'
+  //   },
+  //   legend: {
+  //     show: true,
+  //     right: 0,
+  //     left: '10%',
+  //     itemWidth: 10,
+  //     itemHeight: 10,
+  //     icon: 'circle',
+  //     textStyle: {
+  //       color: '#DBDBDB' 
+  //     },
+  //     // selectedMode: 'multiple',
+      
+  //     data: ['购物力', '依恋感', '安全感', '信念感', '分享欲']
+  //   },
+  //   grid: {
+  //     containLabel: true,
+  //     left: '0%',
+  //     top: '20%',
+  //     width: '90%',
+  //     height: '70%'
+  //   },
+  //   // toolbox: {
+  //   //   feature: {
+  //   //     saveAsImage: {}
+  //   //   }
+  //   // },
+  //   xAxis: {
+  //     type: 'category',
+  //     boundaryGap: false,
+  //     axisLine: {
+  //       symbol: ['none', 'arrow'],
+  //       lineStyle: {
+  //         color: '#DBDBDB'
+  //       }
+  //     },
+  //     axisTick: {
+  //       show: false
+  //     },
+  //     data: ['1', '18', '523', '591', '613', '815', '857', '951', '1281', '1470']
+  //   },
+  //   yAxis: {
+  //     splitLine:{
+  //       show: false
+  //     },
+  //     type: 'value',
+  //     axisLine: {
+  //       show: true,
+  //       symbol: ['none', 'arrow'],
+  //       lineStyle: {
+  //         color: '#DBDBDB'
+  //       }
+  //     },
+  //     axisTick: {
+  //       show: false
+  //     }
+  //   },
+  //   series: [
+  //     {
+  //       name: '购物力',
+  //       type: 'line',
+  //       smooth: true,
+  //       symbol: 'none',
+  //       emphasis: {
+  //         disabled: false,
+  //         focus: 'self',
+  //       },
+  //       data: [16, 16, 16, 35, 45, 50, 45, 66, 62, 68]
+  //     },
+  //     {
+  //       name: '依恋感',
+  //       type: 'line',
+  //       smooth: true,
+  //       symbol: 'none',
+  //       emphasis: {
+  //         disabled: false,
+  //         focus: 'self',
+  //       },
+  //       data: [58, 78, 76, 44, 43, 55, 55, 40, 40, 40]
+  //     },
+  //     {
+  //       name: '安全感',
+  //       type: 'line',
+  //       smooth: true,
+  //       symbol: 'none',
+  //       emphasis: {
+  //         disabled: false,
+  //         focus: 'self',
+  //       },
+  //       data: [45, 56, 30, 46, 29, 29, 29, 35, 32, 40]
+  //     },
+  //     {
+  //       name: '信念感',
+  //       type: 'line',
+  //       smooth: true,
+  //       symbol: 'none',
+  //       emphasis: {
+  //         disabled: false,
+  //         focus: 'self',
+  //       },
+  //       data: [12, 12, 12, 12, 16, 17, 13, 10, 14, 18]
+  //     },
+  //     {
+  //       name: '分享欲',
+  //       type: 'line',
+  //       smooth: true,
+  //       symbol: 'none',
+  //       emphasis: {
+  //         disabled: false,
+  //         focus: 'self',
+  //       },
+  //       data: [72, 72, 89, 72, 72, 65, 72, 72, 55, 72]
+  //     }
+  //   ]
+  // }
+  const [lineChartOption, setLineChartOption] = useState<MyChartOption>({
+    // title: {
+    //   text: 'Stacked Line'
+    // },
+    tooltip: {
+      // trigger: 'axis'
+    },
+    legend: {
+      show: true,
+      right: 0,
+      width: '60%',
+      itemWidth: 10,
+      itemHeight: 10,
+      icon: 'circle',
+      textStyle: {
+        color: '#DBDBDB' 
+      },
+      // selectedMode: 'multiple',
+      
+      data: ['购物力', '依恋感', '安全感', '信念感', '分享欲']
+    },
+    grid: {
+      containLabel: true,
+      left: '0',
+      top: '25%',
+
+      width: '100%',
+      height: '52%'
+    },
+    // toolbox: {
+    //   feature: {
+    //     saveAsImage: {}
+    //   }
+    // },
+    xAxis: {
+      name: '历史属性状态',
+      nameLocation: 'middle',
+      nameGap: 5,
+      type: 'category',
+      boundaryGap: false,
+      axisLine: {
+        symbol: ['none', 'arrow'],
+        lineStyle: {
+          color: '#DBDBDB'
+        }
+      },
+      axisTick: {
+        show: false
+      },
+      axisLabel: {
+        show: false
+      },
+      data: ['1', '18', '523', '591', '613', '815', '857', '951', '1281', '1470']
+    },
+    yAxis: {
+      name: '内在价值(V)',
+      nameGap: 15,
+      // nameTextStyle: {
+      //   align: 'left'
+      // },
+      splitLine:{
+        show: false
+      },
+      type: 'value',
+      axisLine: {
+        show: true,
+        symbol: ['none', 'arrow'],
+        lineStyle: {
+          color: '#DBDBDB'
+        }
+      },
+      axisTick: {
+        show: false
+      }
+    },
+    series: [
+      {
+        name: '购物力',
+        type: 'line',
+        smooth: true,
+        symbol: 'none',
+        emphasis: {
+          disabled: false,
+          focus: 'self',
+        },
+        data: [16, 16, 16, 35, 45, 50, 45, 66, 62, 68]
+      },
+      {
+        name: '依恋感',
+        type: 'line',
+        smooth: true,
+        symbol: 'none',
+        emphasis: {
+          disabled: false,
+          focus: 'self',
+        },
+        data: [58, 78, 76, 44, 43, 55, 55, 40, 40, 40]
+      },
+      {
+        name: '安全感',
+        type: 'line',
+        smooth: true,
+        symbol: 'none',
+        emphasis: {
+          disabled: false,
+          focus: 'self',
+        },
+        data: [45, 56, 30, 46, 29, 29, 29, 35, 32, 40]
+      },
+      {
+        name: '信念感',
+        type: 'line',
+        smooth: true,
+        symbol: 'none',
+        emphasis: {
+          disabled: false,
+          focus: 'self',
+        },
+        data: [12, 12, 12, 12, 16, 17, 13, 10, 14, 18]
+      },
+      {
+        name: '分享欲',
+        type: 'line',
+        smooth: true,
+        symbol: 'none',
+        emphasis: {
+          disabled: false,
+          focus: 'self',
+        },
+        data: [72, 72, 89, 72, 72, 65, 72, 72, 55, 72]
+      }
+    ]
+  });
 
   useEffect(() => {
     console.log("redisData", redisData)
@@ -238,13 +660,15 @@ export const Sheet = () => {
       
       const historyEvent: AgentEvent[] = [];
       const showingData = JSON.parse(JSON.stringify(redisData));
-
       
+      const lineChartData: number[][] =  [[], [], [], [], []];
+
       for (let index = 0; index < redisData.length; index++) {
         historyEvent.push({
           name: redisData[index].action,
           frame: redisData[index].game_info.frame
         })
+
         
         // 改写attr数据（添加差值）
         let attr = redisData[index].attr_value;
@@ -277,9 +701,6 @@ export const Sheet = () => {
             const thisValue = attr[key];
             const frontValue = redisData[index-1].attr_value[key]
             const diff = thisValue - frontValue;
-            console.log("thisValue", thisValue)
-            console.log("frontValue", frontValue)
-            console.log("diff", diff)
             let trend = "";
             if( diff > 0 ) {
               trend = "plus";
@@ -298,12 +719,79 @@ export const Sheet = () => {
           }
           showingData[index].attr_value = newAttr
         }
+
+        // linechart 数据
+        const numberOfKeys = Object.keys(attr);
+        for (let keyIndex = 0; keyIndex < numberOfKeys.length; keyIndex++) {
+          lineChartData[keyIndex].push(attr[numberOfKeys[keyIndex]])
+        }
       }
-      // console.log("redisData", redisData)
+      console.log("lineChartData", lineChartData)
+      
       setHistoryEvent(historyEvent);
       // setAttrList(showingData);
       setCurrentData(showingData);
       setAttrValues(showingData[showingData.length - 1].attr_value);
+      
+      // setLineChartOption({
+      //   series: [
+      //     {
+      //       name: '购物力',
+      //       type: 'line',
+      //       smooth: true,
+      //       symbol: 'none',
+      //       emphasis: {
+      //         disabled: false,
+      //         focus: 'self',
+      //       },
+      //       data: [16, 16, 16, 35, 45, 50, 45, 66, 62, 68]
+      //     },
+      //     {
+      //       name: '依恋感',
+      //       type: 'line',
+      //       smooth: true,
+      //       symbol: 'none',
+      //       emphasis: {
+      //         disabled: false,
+      //         focus: 'self',
+      //       },
+      //       data: [58, 78, 76, 44, 43, 55, 55, 40, 40, 40]
+      //     },
+      //     {
+      //       name: '安全感',
+      //       type: 'line',
+      //       smooth: true,
+      //       symbol: 'none',
+      //       emphasis: {
+      //         disabled: false,
+      //         focus: 'self',
+      //       },
+      //       data: [45, 56, 30, 46, 29, 29, 29, 35, 32, 40]
+      //     },
+      //     {
+      //       name: '信念感',
+      //       type: 'line',
+      //       smooth: true,
+      //       symbol: 'none',
+      //       emphasis: {
+      //         disabled: false,
+      //         focus: 'self',
+      //       },
+      //       data: [12, 12, 12, 12, 16, 17, 13, 10, 14, 18]
+      //     },
+      //     {
+      //       name: '分享欲',
+      //       type: 'line',
+      //       smooth: true,
+      //       symbol: 'none',
+      //       emphasis: {
+      //         disabled: false,
+      //         focus: 'self',
+      //       },
+      //       data: [72, 72, 89, 72, 72, 46, 72, 72, 55, 72]
+      //     }
+      //   ]
+      // })
     }
   }, [redisData]);
 
@@ -355,17 +843,30 @@ export const Sheet = () => {
   };
 
   const clickItemRef = useRef(null);
+  const showingAttrRef = useRef(null);
 
   function handleEdit() {
+    // e.stopPropagation();
+    // setEditingAttrValues(editingAttrValues);
+    // let showingAttr = isClicking >= 0 ? currentData[isClicking].attr_value![info.label] : attrValues![info.label];
+    
+    console.log("isClicking", isClicking)
+
+    const showingAttr = JSON.parse(JSON.stringify(isClicking >= 0 ? currentData[isClicking].attr_value : currentData[currentData.length - 1].attr_value));
+    
+    console.log("when editing", showingAttr)
+    // for (let key in attrNodes) {
+    //   attrNodes[key].innerText = showingAttr[key].value;
+    // }
+    setEditingAttrValues(showingAttr);
     setIsEditing(true);
-    for (let key in attrNodes) {
-      attrNodes[key].innerText = attrValues[key].value;
-    }
+    // console.log("attrNodes", attrNodes)
   }
 
   function handleInput(e: any, label: string) {
     let value = e.target.innerText;
     value = value.replace(/[^\d]/g,'');
+    value = Number(value);
     if( value < 0 || value > 100) {
       return
     }
@@ -374,23 +875,68 @@ export const Sheet = () => {
   }
 
   function handleConfirm() {
+    const showingAttr = JSON.parse(JSON.stringify(isClicking >= 0 ? currentData[isClicking].attr_value : currentData[currentData.length - 1].attr_value));
+    
     let key: keyof AttrValue;
-    for (key in attrValues) {
-      attrValues[key].value = editingAttrValues[key].value;
+    for (key in showingAttr) {
+      showingAttr[key].value = editingAttrValues[key].value;
     }
-    setAttrValues(attrValues);
+    if ( isClicking >= 0 ) {
+      currentData[isClicking].attr_value = showingAttr;
+    }
+    else {
+      currentData[currentData.length - 1].attr_value = showingAttr;
+    }  
+    for (let index = 1; index < currentData.length; index++) {
+      for(let key in showingAttr) {
+        const thisValue = currentData[index].attr_value[key].value;
+        const frontValue = currentData[index-1].attr_value[key].value;
+        const diff = thisValue - frontValue;
+        let trend = "";
+        if( diff > 0 ) {
+          trend = "plus";
+        }
+        else if ( diff < 0 ) {
+          trend = "minus";
+        }
+        else {
+          trend = "none";
+        }
+        currentData[index].attr_value[key].diff = Math.abs(diff);
+        currentData[index].attr_value[key].trend = trend;
+    }
+    setCurrentData(currentData);
     setIsEditing(false);
+  }
   }
 
   function handleCancel() {
+    const showingAttr = JSON.parse(JSON.stringify(isClicking >= 0 ? currentData[isClicking].attr_value : currentData[currentData.length - 1].attr_value));
+    let key: keyof AttrValue;
+    for (key in showingAttr) {
+      editingAttrValues[key].value = showingAttr[key].value;
+    }
+    
+    // console.log("showingAttr", showingAttr)
+    setEditingAttrValues(editingAttrValues);
+    // console.log("when cancel", editingAttrValues)
+    for (let key in attrNodes) {
+      attrNodes[key].innerText = showingAttr[key].value;
+    }
     setIsEditing(false);
   }
 
-  function clickHistoryEvent(index: number) {
+  function clickHistoryEvent(e: any, index: number) {
     console.log("index", index)
     setIsClicking(index);
+    console.log("isEditing", isEditing)
   }
 
+  useEffect(() => {
+    if ( isEditing ) {
+      handleEdit();
+    }
+  }, [isClicking])
 
   function handleClick(event: any) {
     // console.log("event", event);
@@ -444,7 +990,7 @@ export const Sheet = () => {
                 </div>
               </div>
 
-              <div className="w-full h-[2%] flex justify-end items-center pr-12">
+              <div className="w-full h-[2%] flex justify-end items-center pr-12" onClick={ e => e.stopPropagation()}>
                 
                 <img 
                   src="/UI_edit.png"
@@ -512,7 +1058,7 @@ export const Sheet = () => {
                           <div
                             key={event.frame}
                             className={`${ index == isClicking ? 'text-[#D1CDAC]' : 'text-white' } w-full h-1/3 flex items-center gap-x-4 text-md border-b border-white border-opacity-50 hover:text-[#D1CDAC]`}
-                            onClick={() => clickHistoryEvent(index)}
+                            onClick={(e) => clickHistoryEvent(e, index)}
                           >
                             <div className="w-[30%] pl-2">{event.frame}</div>
                             <div className="w-[70%] truncate">{event.name}</div>
@@ -545,9 +1091,9 @@ export const Sheet = () => {
                   </HoverCard> */}
                   
                   {/* <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">{redisData.length ? redisData[0].name : ""}</div> */}
-                  <div className="flex flex-col justify-between h-[80%] gap-y-3 pl-3 mt-5">
+                  <div className="flex flex-col justify-between h-[80%] gap-y-3 pl-3 mt-5" ref={showingAttrRef} onClick={ e => e.stopPropagation() }>
                     {infos.map((info) => {
-                      let showingAttr = isClicking >= 0 ? currentData[isClicking].attr_value![info.label] : attrValues![info.label];
+                      let showingAttr = isClicking >= 0 ? currentData[isClicking].attr_value![info.label] : currentData[currentData.length - 1].attr_value!![info.label];
                       return (
                         <div key={info.label} className="flex items-center ">
                           <div className="flex items-center gap-x-2 w-26">
@@ -557,7 +1103,7 @@ export const Sheet = () => {
                             </span>
                           </div>
                           <Progress
-                            value={isClicking >= 0 ? showingAttr.value : showingAttr.value}
+                            value={showingAttr.value}
                             // value={isClicking >= 0 ? currentData[isClicking].attr_value![info.label] : attrValues![info.label]}
                             // value={attrValues![info.label]}
                             className="w-24 mr-2 transition-all duration-200"
@@ -566,17 +1112,19 @@ export const Sheet = () => {
                             className="w-8 h-6 px-1 text-l justify-center items-center bg-transparent border border-[#F4F1F1] border-opacity-0"
                             style={{ display: isEditing ? "none" : "flex"}}
                           >
-                            {isClicking >= 0 ? showingAttr.value : showingAttr.value}
+                            {showingAttr.value}
                             {/* {isClicking >= 0 ? currentData[isClicking].attr_value![info.label] : attrValues![info.label]} */}
                             {/* {attrValues![info.label]} */}
                           </div>
                           <div
+                            id="edit div"
                             className="w-8 h-6 px-1 text-l flex justify-center items-center bg-transparent border  border-[#F4F1F1] rounded"
                             style={{ display: isEditing ? "flex" : "none"}}
-                            ref={node => {  attrNodes[info.label] = node }}
+                            ref={node => { attrNodes[info.label] = node }}
                             contentEditable
                             onInput={(e) => {handleInput(e, info.label)}}
                           >
+                            {editingAttrValues[info.label].value}
                           </div>
                           <div
                             className="w-8 h-6  flex justify-center items-center text-xs"
@@ -600,13 +1148,15 @@ export const Sheet = () => {
               DATA ANALYSIS
             </div>
             <div className="relative w-[24.5vw] h-[36vh] -ml-10 px-2 flex justify-between items-center bg-[#1F1F1FB2] rounded-3xl">
-              <div className=" h-[32vh] ml-2 flex flex-col items-center gap-y-3">
-                <p className="text-xl font-semibold">Equilibrium State</p>
-                <UVBar UV={UV} />
+              <div className="w-[45%] h-[32vh] ml-2 flex flex-col items-center gap-y-3">
+                <p className="text-xl font-semibold">内在价值状态</p>
+                {/* <UVBar UV={UV} /> */}
+                <MyChart option={funnelChartOption} width="100%" height="100%" ></MyChart>
               </div>
-              <div className=" h-[32vh] flex flex-col items-center gap-y-3">
-                <p className="text-xl font-semibold">Energy Scale</p>
-                <RoseGraph isDisplay />
+              <div className="w-[50%] h-[32vh] mr-4 flex flex-col items-center gap-y-8">
+                <p className="text-xl font-semibold">历史属性状态</p>
+                {/* <RoseGraph isDisplay /> */}
+                <MyChart option={lineChartOption} width="100%" height="90%" ></MyChart>
               </div>
             </div>
           </div>
