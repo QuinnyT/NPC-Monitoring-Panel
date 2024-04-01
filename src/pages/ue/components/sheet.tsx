@@ -1,4 +1,5 @@
-import { useEffect, useState, useRef } from "react";
+// eslint-disable-next-line no-redeclare
+import { useEffect, useState, useRef, MouseEvent, FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -24,12 +25,15 @@ import {
 } from "lucide-react";
 
 import { AttrValue, RedisData, useRedis } from "@/hooks/use-redis";
+// import { eventClient } from "@/hooks/ioredis"
 // import RoseGraph from "./rose-graph";
 // import { UVBar } from "./uv-bar";
 // import { text } from "stream/consumers";
 // import { setInterval } from "timers/promises";
 // import { DropdownMenuPortal } from "@radix-ui/react-dropdown-menu";
-
+import { eventClient } from "@/hooks/use-ioredis";
+import axios from "axios";
+import { TopLevelFormatterParams } from "echarts/types/dist/shared.js";
 
 type Info = {
   label: string;
@@ -236,6 +240,7 @@ type AgentEvent = {
   name: string;
   attr_value: NewAttrValue;
 };
+
 export const Sheet = () => {
   
 
@@ -317,23 +322,12 @@ export const Sheet = () => {
     {
       frame: 100,
       name: "Test2",
-      attr_value: currentAttrValues[1]
+      attr_value: currentAttrValues[0]
     }
   ])
 
   const [isClicking, setIsClicking] = useState<number>(-1);
-  // const [currentIndex, setCurrentIndex] = useState<number>(-1);
-  // const [attrList, setAttrList] = useState<AttrValue[]>([
-  //   {
-  //     Survival: 0,
-  //     Belonging: 0,
-  //     Social: 0,
-  //     Intimacy: 0,
-  //     Honor: 0,
-  //   }
-  // ])
 
-  const { redisData } = useRedis();
   const box = useRef(null);
   const [isDisplay, setIsDisplay] = useState(false);
   
@@ -370,11 +364,8 @@ export const Sheet = () => {
   });
   // const [editingAttrValues, setEditingAttrValues] = useState<AttrValue>({...currentAttrValues}); 
   // const [showingData, setShowingAttrValues] = useState<ShowingAttrValues>({...currentAttrValues, trend: "up", diff: 0}); 
-
-  const funnelChartOption: MyChartOption = {
-    // title: {
-    //   text: 'Funnel'
-    // },
+  
+  const [funnelChartOption, setFunnelChartOption] = useState<MyChartOption>({
     tooltip: {
       show: true,
       trigger: 'item',
@@ -408,16 +399,6 @@ export const Sheet = () => {
         },
         labelLine: {
           show: false
-        },
-        itemStyle: {
-          // opacity: 0.7,
-          // color: {
-          //   type: 'linear',
-          //   x: 0,
-          //   y: 0,
-          //   x2: 0,
-          //   y2: 1,
-          // }
         },
         emphasis: {
           disabled: true
@@ -516,151 +497,30 @@ export const Sheet = () => {
         ]
       },
     ]
-  } 
+  } ) 
 
-  // const lineChartOption: MyChartOption = {
-  //   // title: {
-  //   //   text: 'Stacked Line'
-  //   // },
-  //   tooltip: {
-  //     // trigger: 'axis'
-  //   },
-  //   legend: {
-  //     show: true,
-  //     right: 0,
-  //     left: '10%',
-  //     itemWidth: 10,
-  //     itemHeight: 10,
-  //     icon: 'circle',
-  //     textStyle: {
-  //       color: '#DBDBDB' 
-  //     },
-  //     // selectedMode: 'multiple',
-      
-  //     data: ['购物力', '依恋感', '安全感', '信念感', '分享欲']
-  //   },
-  //   grid: {
-  //     containLabel: true,
-  //     left: '0%',
-  //     top: '20%',
-  //     width: '90%',
-  //     height: '70%'
-  //   },
-  //   // toolbox: {
-  //   //   feature: {
-  //   //     saveAsImage: {}
-  //   //   }
-  //   // },
-  //   xAxis: {
-  //     type: 'category',
-  //     boundaryGap: false,
-  //     axisLine: {
-  //       symbol: ['none', 'arrow'],
-  //       lineStyle: {
-  //         color: '#DBDBDB'
-  //       }
-  //     },
-  //     axisTick: {
-  //       show: false
-  //     },
-  //     data: ['1', '18', '523', '591', '613', '815', '857', '951', '1281', '1470']
-  //   },
-  //   yAxis: {
-  //     splitLine:{
-  //       show: false
-  //     },
-  //     type: 'value',
-  //     axisLine: {
-  //       show: true,
-  //       symbol: ['none', 'arrow'],
-  //       lineStyle: {
-  //         color: '#DBDBDB'
-  //       }
-  //     },
-  //     axisTick: {
-  //       show: false
-  //     }
-  //   },
-  //   series: [
-  //     {
-  //       name: '购物力',
-  //       type: 'line',
-  //       smooth: true,
-  //       symbol: 'none',
-  //       emphasis: {
-  //         disabled: false,
-  //         focus: 'self',
-  //       },
-  //       data: [16, 16, 16, 35, 45, 50, 45, 66, 62, 68]
-  //     },
-  //     {
-  //       name: '依恋感',
-  //       type: 'line',
-  //       smooth: true,
-  //       symbol: 'none',
-  //       emphasis: {
-  //         disabled: false,
-  //         focus: 'self',
-  //       },
-  //       data: [58, 78, 76, 44, 43, 55, 55, 40, 40, 40]
-  //     },
-  //     {
-  //       name: '安全感',
-  //       type: 'line',
-  //       smooth: true,
-  //       symbol: 'none',
-  //       emphasis: {
-  //         disabled: false,
-  //         focus: 'self',
-  //       },
-  //       data: [45, 56, 30, 46, 29, 29, 29, 35, 32, 40]
-  //     },
-  //     {
-  //       name: '信念感',
-  //       type: 'line',
-  //       smooth: true,
-  //       symbol: 'none',
-  //       emphasis: {
-  //         disabled: false,
-  //         focus: 'self',
-  //       },
-  //       data: [12, 12, 12, 12, 16, 17, 13, 10, 14, 18]
-  //     },
-  //     {
-  //       name: '分享欲',
-  //       type: 'line',
-  //       smooth: true,
-  //       symbol: 'none',
-  //       emphasis: {
-  //         disabled: false,
-  //         focus: 'self',
-  //       },
-  //       data: [72, 72, 89, 72, 72, 65, 72, 72, 55, 72]
-  //     }
-  //   ]
-  // }
+  // const [isEmphasis, setIsEmphasis] = useState(-1);
   const [lineChartOption, setLineChartOption] = useState<MyChartOption>({
-    // title: {
-    //   text: 'Stacked Line'
-    // },
     tooltip: {
       show: true,
       trigger: 'axis',
-      position: [20, -25],
+      position: [80, -13],
       padding: 0,
-      textStyle: {
-        height: 4,
-        fontSize: 12,
-      },
-      backgroundColor: "rgba(233,233,233,1)",
-      formatter: function(params) {
+      // textStyle: {
+      //   height: 4,
+      //   fontSize: 12,
+      //   color: 'rgba(255, 255, 255, 1)'
+      // },
+      backgroundColor: '#1F1F1F',
+      borderColor: '#1F1F1F',
+      formatter: function(params: any) {
         let html = 
-        `<div style="height:auto;width:170px;display:flex;flex-flow:wrap;">
-          ${params.map(( item ) => 
-           `<div style="font-size:12px;color:#808080;display:flex;align-items:center;line-height:1.5; margin-left:8px">
-              <span style="margin-right:8px;border-radius:6px;width:6px;height:6px;background-color: ${item.color};"></span>
+        `<div style="height:auto;width:160px;display:flex;flex-flow:wrap;">
+          ${params.map(( item: { color: string; seriesName: string; value: number; } ) => 
+           `<div style="font-size:12px;color:#DBDBDB;display:flex;align-items:center;line-height:2; margin-left:8px">
+              <span style="margin-right:4px;border-radius:10px;width:10px;height:10px;background-color: ${item.color};"></span>
               <span>${item.seriesName}</span>
-              <span style="flex:1;margin-left:8px;">${item.value}</span>
+              <span style="flex:1;margin-left:4px;">${item.value}</span>
            </div>`).join("")}
         </div>`
         return html;
@@ -683,8 +543,7 @@ export const Sheet = () => {
     grid: {
       containLabel: true,
       left: '5%',
-      top: '25%',
-
+      top: '32%',
       width: '90%',
       height: '52%'
     },
@@ -716,6 +575,12 @@ export const Sheet = () => {
     yAxis: {
       name: '内在价值(V)',
       nameGap: 15,
+      max: function (value) {
+        if( value.max + 20 <= 100 )
+          return value.max + 20;
+        else
+          return value.max;
+      },
       // nameTextStyle: {
       //   align: 'left'
       // },
@@ -740,8 +605,10 @@ export const Sheet = () => {
         type: 'line',
         smooth: true,
         symbol: 'none',
+        label: {
+          show: false
+        },
         emphasis: {
-          disabled: false,
           focus: 'self',
         },
         triggerLineEvent: true,
@@ -752,9 +619,11 @@ export const Sheet = () => {
         type: 'line',
         smooth: true,
         symbol: 'none',
+        label: {
+          show: false
+        },
         emphasis: {
-          disabled: false,
-          focus: 'self',
+          focus: 'self'
         },
         triggerLineEvent: true,
         data: [58, 78, 76, 44, 43, 55, 55, 40, 40, 40]
@@ -764,9 +633,11 @@ export const Sheet = () => {
         type: 'line',
         smooth: true,
         symbol: 'none',
+        label: {
+          show: false,
+        },
         emphasis: {
-          disabled: false,
-          focus: 'self',
+          focus: 'self'
         },
         triggerLineEvent: true,
         data: [45, 56, 30, 46, 29, 29, 29, 35, 32, 40]
@@ -776,9 +647,11 @@ export const Sheet = () => {
         type: 'line',
         smooth: true,
         symbol: 'none',
+        label: {
+          show: false
+        },
         emphasis: {
-          disabled: false,
-          focus: 'self',
+          focus: 'self'
         },
         triggerLineEvent: true,
         data: [12, 12, 12, 12, 16, 17, 13, 10, 14, 18]
@@ -788,9 +661,11 @@ export const Sheet = () => {
         type: 'line',
         smooth: true,
         symbol: 'none',
+        label: {
+          show: false
+        },
         emphasis: {
-          disabled: false,
-          focus: 'self',
+          focus: 'self'
         },
         triggerLineEvent: true,
         data: [72, 72, 89, 72, 72, 65, 72, 72, 55, 72]
@@ -798,6 +673,7 @@ export const Sheet = () => {
     ]
   });
 
+  const { redisData } = useRedis();
   // var timer = Number(setInterval(() => {    
   //   if (currentAttrValues.length < latestData.length) {
   //     console.log("before currentAttrValues", currentAttrValues)
@@ -818,12 +694,14 @@ export const Sheet = () => {
   // }, 3000);
   // var count = latestData.length;
 
+  // 模拟数据更新
   // setTimeout(() => {
   //   if (currentAttrValues.length < latestData.length) {
   //     // console.log("before currentAttrValues", currentAttrValues)
   //     setCurrentAttrValues((prevValue => prevValue.concat([latestData[currentAttrValues.length]])));
   //   }
   // }, 3000);
+
   useEffect(() => {
     // console.log("latestData", latestData)
     console.log("currentAttrValues", currentAttrValues)
@@ -847,23 +725,26 @@ export const Sheet = () => {
       const showingData = JSON.parse(JSON.stringify(redisData));
       
       const lineChartData: number[][] =  [[], [], [], [], []];
+      const lineChartXAxis = JSON.parse(JSON.stringify(lineChartOption.xAxis));
+      lineChartXAxis.data = []
+      const lineChartSeries = JSON.parse(JSON.stringify(lineChartOption.series));
 
       for (let index = 0; index < redisData.length; index++) {
         
-
-        
         // 改写attr数据（添加差值）
         let attr = redisData[index].attr_value;
+        
+        let newAttr = {
+          Survival: {},
+          Belonging: {},
+          Social: {},
+          Intimacy: {},
+          Honor: {}
+        };
+        type arrKeyType = keyof typeof newAttr; 
         if( index == 0 ) {
-          let newAttr: any = {
-            Survival: {},
-            Belonging: {},
-            Social: {},
-            Intimacy: {},
-            Honor: {}
-          };
           for(let key in attr) {
-            newAttr[key] = {
+            newAttr[key as arrKeyType] = {
               value: attr[key],
               trend: "none",
               diff: 0
@@ -872,13 +753,6 @@ export const Sheet = () => {
           showingData[index].attr_value = newAttr
         }
         else {
-          let newAttr: any = {
-            Survival: {},
-            Belonging: {},
-            Social: {},
-            Intimacy: {},
-            Honor: {}
-          };
           for(let key in attr) {
             const thisValue = attr[key];
             const frontValue = redisData[index-1].attr_value[key]
@@ -893,7 +767,7 @@ export const Sheet = () => {
             else {
               trend = "none";
             }
-            newAttr[key] = {
+            newAttr[key as arrKeyType] = {
               value: thisValue,
               trend: trend,
               diff: Math.abs(diff),
@@ -910,11 +784,18 @@ export const Sheet = () => {
         })
 
         // linechart 数据
+        lineChartXAxis.data.push(redisData[index].game_info.frame);
+
         const numberOfKeys = Object.keys(attr);
         for (let keyIndex = 0; keyIndex < numberOfKeys.length; keyIndex++) {
           lineChartData[keyIndex].push(attr[numberOfKeys[keyIndex]])
         }
       }
+      lineChartSeries.map((item: any, index: number) => {
+        item.data = lineChartData[index]
+      })
+      console.log("lineChartXAxis", lineChartXAxis)
+      setLineChartOption(Object.assign({}, lineChartOption, { xAxis: lineChartXAxis, series: lineChartSeries }));
       
       setHistoryEvent(historyEvent);
       // setAttrList(showingData);
@@ -980,23 +861,11 @@ export const Sheet = () => {
       //     }
       //   ]
       // })
+      
+      const v = transAttrToUV(currentAttrValues[0]);
+      vTpOption(v);
     }
   }, [redisData]);
-
-  // useEffect(() => {
-  //   console.log("currentData", currentData)
-  //   console.log("currentAttrValues", currentAttrValues)
-  // }, [currentData, currentAttrValues]);
-
-  // useEffect(() => {
-  //   if( isClicking ) {
-  //     setAttrValues(attrList[isClicking]);
-  //   }
-  //   else {
-  //     setAttrValues(attrList[attrList.length - 1]);
-  //   }
-  //   console.log("attrList", attrList)
-  // }, [isClicking, attrList]);
 
   // function handleHoverCardOpenChange(open: boolean) {
   //   console.log(box.current);
@@ -1014,12 +883,12 @@ export const Sheet = () => {
   // let attrNodes: Array<any> = [];
   
   type AttrNode = {
-    Survival: any;
-    Belonging: any;
-    Social: any;
-    Intimacy: any;
-    Honor: any;
-    [key: string]: any;
+    Survival: HTMLDivElement | null;
+    Belonging: HTMLDivElement | null;
+    Social: HTMLDivElement | null;
+    Intimacy: HTMLDivElement | null;
+    Honor: HTMLDivElement | null;
+    [key: string]: HTMLDivElement | null;
   };
   const attrNodes: AttrNode = {
     Survival: null,
@@ -1029,8 +898,109 @@ export const Sheet = () => {
     Honor: null,
   };
 
-  const clickItemRef = useRef(null);
+  const clickItemRef = useRef<HTMLDivElement | null>(null);
   const showingAttrRef = useRef(null);
+
+  function transAttrToUV(attrValueObj: NewAttrValue) {
+    var attrValue = [];
+    for( let index = 0; index< Object.keys(attrValueObj).length; index++){
+      let obj = attrValueObj[Object.keys(attrValueObj)[index]];
+      attrValue.push(obj.value)
+    }
+    let v0 = (attrValue[0] + attrValue[1]) / 2;
+    let v1 = (attrValue[2] + attrValue[3]) / 2;
+    let v2 = attrValue[attrValue.length - 1];
+
+    let uvValue = 0;
+    if (v0 < 30) {
+        uvValue = v0;
+    } else if (attrValue[0] <= 15) {
+        uvValue = attrValue[1] / 4.45 + attrValue[0] / 2;
+    } else if (attrValue[1] <= 15) {
+        uvValue = attrValue[0] / 4.45 + attrValue[1] / 2;
+    } else if (v0 >= 30 && v1 <= 50) {
+        uvValue = 30 + (v0 - 30) * 10 / 70;
+        uvValue += v1 * 30 / 50;
+    } else if (v0 >= 30 && v1 > 50) {
+        uvValue = 30 + (v0 - 30) * 10 / 70;
+        uvValue += 30 + (v1 - 50) * 10 / 50;
+        uvValue += v2 * 20 / 100;
+    }
+
+    return uvValue;
+  }
+  function vTpOption(v: number) {
+    let colorList: (string | object)[] = [];
+    if( v <= 30 ) {
+      const offset = (30 - v) / 30;
+      colorList = ['rgba(134, 122, 106, 0)', 'rgba(181, 181, 169, 0)', {
+        type: 'linear',
+        x: 0,
+        y: 0,
+        x2: 0,
+        y2: 1,
+        colorStops: [{
+            offset: 0, color: 'rgba(208, 208, 206, 0)'
+        }, {
+            offset: offset, color: 'rgba(208, 208, 206, 0)'
+        }, {
+          offset: offset, color: 'rgba(208, 208, 206, 1)'
+        }, {
+           offset: 1, color: 'rgba(208, 208, 206, 1)'
+        }],
+      }]
+    }
+    else if( v > 30 && v <= 60) {
+      const offset = 1 - (v - 30) / 30;
+      colorList = ['rgba(134, 122, 106, 0)', {
+        type: 'linear',
+        x: 0,
+        y: 0,
+        x2: 0,
+        y2: 1,
+        colorStops: [{
+            offset: 0, color: 'rgba(181, 181, 169, 0)'
+        }, {
+            offset: offset, color: 'rgba(181, 181, 169, 0)'
+        }, {
+          offset: offset, color: 'rgba(181, 181, 169, 1)'
+        }, {
+           offset: 1, color: 'rgba(181, 181, 169, 1)'
+        }],
+      }, 'rgba(208, 208, 206, 1)']
+    }
+    else if( v > 60) {
+      const offset = 1 - (v - 60) / 30;
+      colorList = [{
+        type: 'linear',
+        x: 0,
+        y: 0,
+        x2: 0,
+        y2: 1,
+        colorStops: [{
+            offset: 0, color: 'rgba(134, 122, 106, 0)'
+        }, {
+            offset: offset, color: 'rgba(134, 122, 106, 0)'
+        }, {
+          offset: offset, color: 'rgba(134, 122, 106, 1)'
+        }, {
+           offset: 1, color: 'rgba(134, 122, 106, 1)'
+        }],
+      }, 'rgba(181, 181, 169, 1)', 'rgba(208, 208, 206, 1)']
+    }
+    const newOption = JSON.parse(JSON.stringify(funnelChartOption));
+    // newseries.map((item: any) => {
+    //     item.label.show = false;
+    // })
+    
+    newOption.tooltip.formatter = String(v)
+    newOption.series[0].data.map( (item: any, index: number) => {
+      item.itemStyle.color = colorList[index];
+    })
+    console.log("newOption", newOption)
+    setFunnelChartOption(newOption);
+  }
+
 
   function handleEdit() {
     // e.stopPropagation();
@@ -1045,18 +1015,19 @@ export const Sheet = () => {
     setIsEditing(true);
   }
 
-  function handleInput(e: any, label: string) {
-    let value = e.target.innerText;
+  function handleInput(e: FormEvent, label: string) {
+    const target = e.target as HTMLInputElement;
+    let  value = target.innerText;
     value = value.replace(/[^\d]/g,'');
-    value = Number(value);
-    if( value < 0 || value > 100) {
+    const valueNum = Number(value);
+    if( valueNum < 0 || valueNum > 100) {
       return
     }
-    editingAttrValues[label].value = value;
+    editingAttrValues[label].value = valueNum;
     setEditingAttrValues(editingAttrValues);
   }
 
-  function handleConfirm() {
+  async function handleConfirm() {
     // const showingAttr = JSON.parse(JSON.stringify(isClicking >= 0 ? historyEvent[isClicking].attr_value : currentAttrValues[currentAttrValues.length - 1]));
     const curIndex = currentAttrValues.length - 1;
     const curAttr = currentAttrValues[curIndex];
@@ -1079,11 +1050,15 @@ export const Sheet = () => {
       newAttr[key].value = newValue;
       newAttr[key].diff = Math.abs(diff);
       newAttr[key].trend = trend;
-      
     }
     currentAttrValues.push(newAttr)
     setCurrentAttrValues(currentAttrValues);
-    console.log("currentAttrValues", currentAttrValues);
+    console.log("newAttr", newAttr);
+    const response = await axios.post("http://localhost:3000/change_attr", {
+        id: '李白',
+        attr: [newAttr.Survival.value, newAttr.Belonging.value, newAttr.Social.value, newAttr.Intimacy.value, newAttr.Honor.value]
+    })
+    console.log("response", response)
     setIsEditing(false);
     // setIsClicking(-1);
 
@@ -1128,12 +1103,13 @@ export const Sheet = () => {
     setEditingAttrValues(editingAttrValues);
     // console.log("when cancel", editingAttrValues)
     for (let key in attrNodes) {
-      attrNodes[key].innerText = showingAttr[key].value;
+      const attrNode = attrNodes[key] as HTMLDivElement;
+      attrNode.innerText = showingAttr[key].value;
     }
     setIsEditing(false);
   }
 
-  function clickHistoryEvent(e: any, index: number) {
+  function clickHistoryEvent(index: number) {
     setIsClicking(index);
   }
 
@@ -1143,24 +1119,54 @@ export const Sheet = () => {
     }
   }, [isClicking])
 
-  function handleClick(event: any) {
+ function handleClick(event: MouseEvent<HTMLDivElement>) {
     // console.log("event", event);
     event.preventDefault();
     event.stopPropagation();
-    if( !clickItemRef.current.contains(event.target) ) {
-      setIsClicking(-1)
+    const current = clickItemRef.current;
+    if (current) {
+      if( !current.contains(event.target as Node) ) {
+        setIsClicking(-1)
+      }
     }
   }
   
-  function insertNewEvent() {
+  async function insertNewEvent() {
     console.log("selectedEvent", selectedEvent)
+    const response = await axios.post("http://localhost:3000/history_event", {
+        id: '李白',
+        event: selectedEvent
+    })
+    console.log("response", response)
     setSelectedEvent("");
+  }
+
+  function linesClickEvent(event: any) {
+    console.log("event", event)
+    event.event.stop("click")
+    const newseries = JSON.parse(JSON.stringify(lineChartOption.series));
+    newseries.map((item: any, index: any) => {
+      if(index == event.seriesIndex) {
+        item.label.show = true;
+      }
+      else {
+        item.label.show = false;
+      }
+    })
+    setLineChartOption(Object.assign({}, lineChartOption, { series: newseries }));
+  }
+  function cancelLabel() {
+    const newseries = JSON.parse(JSON.stringify(lineChartOption.series));
+    newseries.map((item: any) => {
+        item.label.show = false;
+    })
+    setLineChartOption(Object.assign({}, lineChartOption, { series: newseries }));
   }
 
   return (
     <div>
       <div
-        onClick={(e) => handleClick(e)}
+        onClick={handleClick}
         className="absolute z-40 top-0 right-0 h-full flex items-center rounded-r-2xl overflow-x-hidden bg-[#6F6F6FCC]/50 backdrop-blur transition-all ease-in-out"
         style={{
           width: isDisplay ? "26vw" : "3vw",
@@ -1172,7 +1178,7 @@ export const Sheet = () => {
         <Button
           onClick={() => setIsDisplay(!isDisplay)}
           variant="ghost"
-          className="-mt-16 hover:bg-transparent"
+          className="mt-6 hover:bg-transparent"
         >
           <ChevronLeft
             className="transition-all duration-500 text-white"
@@ -1185,7 +1191,7 @@ export const Sheet = () => {
               CURRENT AGENT INFO
             </div>
             
-            <div className="w-[24.5vw] h-[28vh] -ml-10 p-2 px-3 bg-[#1F1F1FB2] rounded-3xl relative">
+            <div className="w-[24.5vw] h-[34vh] -ml-10 p-2 px-3 bg-[#1F1F1FB2] rounded-3xl relative">
               <div className="w-full h-[15%] flex justify-between items-center mb-2">
                 <div
                   className="my-2 pl-4 text-2xl font-semibold"
@@ -1195,47 +1201,33 @@ export const Sheet = () => {
                 </div>
               </div>
 
-              <div className="w-full h-[2%] flex justify-end items-center pr-8" onClick={ e => e.stopPropagation()}>
-                {/* <div className="pr-5 text-xs" style={{ display: isEditing ? "flex" : "none" }}>改变最新状态</div> */}
-                <img 
-                  src="/UI_edit.png"
-                  className="cursor-pointer"
-                  style={{ display: isEditing ? "none" : "block" }}
-                  onClick={() => { handleEdit() }}
-                  alt=""
-                />
-                <div className=" justify-end gap-x-3 items-center" style={{ display: isEditing ? "flex" : "none" }}>
-                  <img className="cursor-pointer" src="/UI_confirm.png" onClick={() => handleConfirm()} alt="" />
-                  <img className="cursor-pointer" src="/UI_cancel.png" onClick={() => handleCancel()} alt="" />
-                </div>
-              </div> 
 
               <div className="flex w-full h-[80%]">
                 <div className="w-[10vw] h-full relative">
-                <div className="flex justify-between items-center mb-2">
-                <div
-                  className="my-1 pl-4 text-xl"
-                  style={{ letterSpacing: "0.625rem" }}
-                >
-                  事件
-                </div>
+                  <div className="flex justify-between items-center mb-2">
+                  <div
+                    className="h-[15%] my-1 pl-4 text-xl"
+                    style={{ letterSpacing: "0.625rem" }}
+                  >
+                    事件
+                  </div>
                 </div>
                 {/* <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">{redisData.length ? redisData[0].name : ""}</div> */}
-                <div className="flex flex-col h-3/4 gap-y-3 pl-3 "> 
-                  <div className="flex items-center justify-between h-[12%]">
+                <div className="flex flex-col h-[77%] gap-y-3 pl-3 "> 
+                  <div className="flex items-center justify-between h-[15%]">
                     <DropdownMenu>
-                      <DropdownMenuTrigger className="w-[75%] text-[0.7rem] flex jusify-between border border-[#F5EFEF] opacity-50 p-px rounded ">
+                      <DropdownMenuTrigger className="w-[75%] h-full text-[0.8rem] flex jusify-between border border-[#F5EFEF] opacity-50 p-px rounded ">
                         <div className="w-[80%] flex jusify-between gap-x-2">
-                          <img className="w-4 ml-1" src="/UI_insert.png" />
-                          <div className="truncate"> {selectedEvent != "" ? selectedEvent:"选择输入事件"}</div>
+                          <img className="w-[20%] ml-1" src="/UI_insert.png" />
+                          <div className="w-[80%] truncate"> {selectedEvent != "" ? selectedEvent:"选择输入事件"}</div>
                         </div>
                         <img src="/UI_down.png" />
                       </DropdownMenuTrigger>
                       <DropdownMenuPortal>
-                        <DropdownMenuContent className="w-full bg-white text-[0.7rem] rounded border-x border-b border-[#C3C3C3] border-opacity-50 animate-slideDownAndFade">
+                        <DropdownMenuContent align="start" className="bg-[#262526] w-[125%] h-24 mt-1 text-[0.8rem] rounded border border-[#C3C3C3] animate-slideDownAndFade overflow-auto">
                           {selectEventList.map((item) => (
                             <DropdownMenuItem
-                              className="h-7 bg-[#262526] text-white hover:bg-[#C3C3C3] hover:text-[#333333] border-b border-[#C3C3C3]"
+                              className="h-9 text-[#D9D2D2] hover:bg-[#C3C3C3] hover:text-[#333333] justify-start items-center pl-2"
                               key={item.name}
                               onClick={() => setSelectedEvent(item.name)}
                             >
@@ -1263,7 +1255,7 @@ export const Sheet = () => {
                           <div
                             key={event.frame}
                             className={`${ index == isClicking ? 'text-[#D1CDAC]' : 'text-[#B6B0B0]' } w-[96%] h-1/3 flex items-center gap-x-4 text-md border-b border-[#606060] hover:text-[#D1CDAC] text-sm`}
-                            onClick={(e) => clickHistoryEvent(e, index)}
+                            onClick={() => clickHistoryEvent(index)}
                           >
                             <div className="w-[30%] pl-2">{event.frame}</div>
                             <div className="w-[70%] truncate">{event.name}</div>
@@ -1278,7 +1270,7 @@ export const Sheet = () => {
                 </div>
 
                 </div>
-                <div className="w-[12vw] relative ml-6 mt-1">
+                <div className="w-[12vw] h-full relative ml-6">
                   {/* <HoverCard openDelay={50} onOpenChange={handleHoverCardOpenChange}>
                     <HoverCardTrigger asChild className="absolute top-6 right-10">
                       <HelpCircle />
@@ -1296,13 +1288,31 @@ export const Sheet = () => {
                   </HoverCard> */}
                   
                   {/* <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">{redisData.length ? redisData[0].name : ""}</div> */}
-                  <div className="flex flex-col justify-between h-[80%] gap-y-3 pl-3 mt-5" ref={showingAttrRef} onClick={ e => e.stopPropagation() }>
+                  
+                  <div className="w-full h-[15%] flex justify-between items-center pl-4 pr-8" onClick={ e => e.stopPropagation()}>
+                    <div className="pr-5 text-xl">
+                      { isClicking == -1 ? "实时数值" : "历史数值" }
+                    </div>
+                    <img 
+                      src="/UI_edit.png"
+                      className="cursor-pointer"
+                      style={{ display: isEditing ? "none" : "block" }}
+                      onClick={() => { handleEdit() }}
+                      alt=""
+                    />
+                    <div className=" justify-end gap-x-3 items-center" style={{ display: isEditing ? "flex" : "none" }}>
+                      <img className="cursor-pointer" src="/UI_confirm.png" onClick={() => handleConfirm()} alt="" />
+                      <img className="cursor-pointer" src="/UI_cancel.png" onClick={() => handleCancel()} alt="" />
+                    </div>
+                  </div> 
+
+                  <div className="flex flex-col justify-between h-[77%] gap-y-3 pl-3 mt-2" ref={showingAttrRef} onClick={ e => e.stopPropagation() }>
                     {infos.map((info) => {
                       let showingAttr = isClicking >= 0 ? historyEvent[isClicking].attr_value![info.label] : currentAttrValues[currentAttrValues.length - 1]![info.label];
                       return (
                         <div key={info.label} className="flex items-center ">
                           <div className="flex items-center gap-x-2 w-26">
-                            <info.icon className="w-6 h-6" />
+                            <info.icon className="w-5 h-5" />
                             <span className="text-l w-10">
                               {info.name}
                             </span>
@@ -1322,7 +1332,6 @@ export const Sheet = () => {
                             {/* {currentAttrValues![info.label]} */}
                           </div>
                           <div
-                            id="edit div"
                             className="w-8 h-6 px-1 text-l flex justify-center items-center bg-transparent border  border-[#F4F1F1] rounded"
                             style={{ display: isEditing ? "flex" : "none"}}
                             ref={node => { attrNodes[info.label] = node }}
@@ -1349,19 +1358,19 @@ export const Sheet = () => {
             
 
 
-            <div className="mt-16 mb-4 -ml-8 text-2xl font-semibold tracking-wider">
+            <div className="mt-10 mb-4 -ml-8 text-2xl font-semibold tracking-wider">
               DATA ANALYSIS
             </div>
-            <div className="relative w-[24.5vw] h-[36vh] -ml-10 px-2 flex justify-between items-center bg-[#1F1F1FB2] rounded-3xl">
-              <div className="w-[45%] h-[32vh] ml-2 flex flex-col items-center gap-y-3">
+            <div className="relative w-[24.5vw] h-[32vh] py-4 -ml-10 px-2 flex justify-between items-center bg-[#1F1F1FB2] rounded-3xl">
+              <div className="w-[45%] h-full ml-2 flex flex-col items-center gap-y-3">
                 <p className="text-xl font-semibold">内在价值状态</p>
                 {/* <UVBar UV={UV} /> */}
-                <MyChart option={funnelChartOption} width="100%" height="100%" ></MyChart>
+                <MyChart option={funnelChartOption} width="100%" height="90%" ></MyChart>
               </div>
-              <div className="w-[50%] h-[32vh] mr-4 flex flex-col items-center gap-y-8">
+              <div className="w-[50%] h-full mr-4 flex flex-col items-center gap-y-6" onClick={() => cancelLabel()}>
                 <p className="text-xl font-semibold">历史属性状态</p>
                 {/* <RoseGraph isDisplay /> */}
-                <MyChart option={lineChartOption} width="100%" height="90%"></MyChart>
+                <MyChart option={lineChartOption} width="100%" height="95%" onClick={e =>linesClickEvent(e)}></MyChart>
               </div>
             </div>
           </div>
