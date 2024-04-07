@@ -22,31 +22,30 @@ const redisClient = new Redis({
   host: "192.168.16.74",
   port: 6379,
   password: "123456",
-  db: 0
+  db: 0,
+  keepAlive: 1000,
 });
 
 const eventClient = new Redis({
-  host: "192.168.16.86",
-  port: 40009,
+  host: "192.168.16.74",
+  port: 6379,
   password: "123456",
-  db: 1
+  db: 1,
 });
+
 const attrClient = new Redis({
-  host: "192.168.16.86",
-  port: 40009,
+  host: "192.168.16.74",
+  port: 6379,
   password: "123456",
   db: 2
 });
-// attrClient.del("李白")
 
-// eventClient.rpush("1", "test info");
 
 app.use(express.json());
 app.use(cors());
 app.use("/", router);
 
 app.get("/:key", async (req, res) => {
-  // console.log("get", req)
   const key = req.params.key;
   // const data = await redisClient.LRANGE(key, 0, -1);
   const data = await redisClient.lrange(key, 0, -1);
@@ -54,6 +53,7 @@ app.get("/:key", async (req, res) => {
 });
 
 app.post("/history_event", async (req, res) => {
+  // console.log("req", req)
   const id = req.body.id;
   const event = req.body.event;
   await eventClient.rpush(id, event);

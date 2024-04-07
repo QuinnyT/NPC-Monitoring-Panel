@@ -13,6 +13,7 @@ import MyChart, { MyChartOption } from "@/components/ui/charts";
 //   HoverCardTrigger,
 // } from "@/components/ui/hover-card";
 
+
 import {
   // HelpCircle,
   ChevronLeft,
@@ -31,25 +32,29 @@ import { AttrValue, RedisData, useRedis } from "@/hooks/use-redis";
 // import { text } from "stream/consumers";
 // import { setInterval } from "timers/promises";
 // import { DropdownMenuPortal } from "@radix-ui/react-dropdown-menu";
-import { eventClient } from "@/hooks/use-ioredis";
 import axios from "axios";
-import { TopLevelFormatterParams } from "echarts/types/dist/shared.js";
+// import { TopLevelFormatterParams } from "echarts/types/dist/shared.js";
+import { newChartSize } from "@/hooks/use-set-size";
+import mockRedisData from "@/hooks/test.json";
+import { LineSeriesOption } from "echarts/charts";
+
 
 type Info = {
   label: string;
   name: string;
   icon: LucideIcon;
 };
+
 const infos: Info[] = [
   {
     label: "Survival",
-    name: "荣誉",
-    icon: Award,
+    name: "金钱",
+    icon: BadgeJapaneseYen,
   },
   {
     label: "Belonging",
-    name: "亲密",
-    icon: Heart,
+    name: "生理",
+    icon: ShieldCheck,
   },
   {
     label: "Social",
@@ -58,14 +63,14 @@ const infos: Info[] = [
   },
   {
     label: "Intimacy",
-    name: "生理",
-    icon: ShieldCheck,
+    name: "亲密",
+    icon: Heart,
   },
   {
     label: "Honor",
-    name: "金钱",
-    icon: BadgeJapaneseYen,
-  },
+    name: "荣誉",
+    icon: Award,
+  }
 ];
 
 
@@ -240,7 +245,6 @@ type AgentEvent = {
   name: string;
   attr_value: NewAttrValue;
 };
-
 export const Sheet = () => {
   
 
@@ -270,6 +274,60 @@ export const Sheet = () => {
       },
       Intimacy: {
         value: 10,
+        trend: "none",
+        diff: 0
+      },
+      Honor: {
+        value: 30,
+        trend: "none",
+        diff: 0
+      },
+    },
+    {
+      Survival: {
+        value: 28,
+        trend: "minus",
+        diff: 2
+      },
+      Belonging: {
+        value: 22,
+        trend: "plus",
+        diff: 1
+      },
+      Social: {
+        value: 40,
+        trend: "none",
+        diff: 0
+      },
+      Intimacy: {
+        value: 15,
+        trend: "plus",
+        diff: 5
+      },
+      Honor: {
+        value: 30,
+        trend: "none",
+        diff: 0
+      },
+    },
+    {
+      Survival: {
+        value: 24,
+        trend: "minus",
+        diff: 4
+      },
+      Belonging: {
+        value: 22,
+        trend: "none",
+        diff: 0
+      },
+      Social: {
+        value: 45,
+        trend: "plus",
+        diff: 5
+      },
+      Intimacy: {
+        value: 15,
         trend: "none",
         diff: 0
       },
@@ -322,8 +380,13 @@ export const Sheet = () => {
     {
       frame: 100,
       name: "Test2",
-      attr_value: currentAttrValues[0]
-    }
+      attr_value: currentAttrValues[1]
+    },
+    {
+      frame: 100,
+      name: "Test2",
+      attr_value: currentAttrValues[2]
+    },
   ])
 
   const [isClicking, setIsClicking] = useState<number>(-1);
@@ -333,7 +396,7 @@ export const Sheet = () => {
   
   const [UV, setUV] = useState<{ u: number; v: number }>({ u: 0, v: 0 });
 
-  const [selectedEvent, setSelectedEvent] = useState("");
+  const [selectedEvent, setSelectedEvent] = useState<SelectEventList | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editingAttrValues, setEditingAttrValues] = useState<NewAttrValue>({
     Survival: {
@@ -365,11 +428,19 @@ export const Sheet = () => {
   // const [editingAttrValues, setEditingAttrValues] = useState<AttrValue>({...currentAttrValues}); 
   // const [showingData, setShowingAttrValues] = useState<ShowingAttrValues>({...currentAttrValues, trend: "up", diff: 0}); 
   
+  const chartFontSize = newChartSize(12);
+  const lineWidth = newChartSize(2);
+  const iconSize = newChartSize(10);
+  const iconGap = newChartSize(15);
   const [funnelChartOption, setFunnelChartOption] = useState<MyChartOption>({
+    name: 'funnelchart',
     tooltip: {
       show: true,
       trigger: 'item',
-      formatter: '47'
+      formatter: '47',
+      textStyle: {
+        fontSize: chartFontSize
+      }
     },
     toolbox: {
       // feature: {
@@ -382,6 +453,9 @@ export const Sheet = () => {
       data: ['活着', '活得好', '活得有意义'],
       show: false
     },
+    textStyle: {
+      fontSize: chartFontSize
+    },
     series: [
       {
         type: 'funnel',
@@ -393,9 +467,8 @@ export const Sheet = () => {
           formatter: '{b}',
           position: 'inside',
           color: '#fff',
-          fontSize: 14,
           textBorderColor: '#000',
-          textBorderWidth: 2
+          textBorderWidth: 2,
         },
         labelLine: {
           show: false
@@ -405,29 +478,14 @@ export const Sheet = () => {
         },
         sort: 'ascending',
         data: [
-          // { value: 100, name: '活着' },
-          // { value: 90, name: '活着' },
-          // { value: 80, name: '活着' },
-          // { value: 70, name: '活着' },
-          // { value: 60, name: '活得好' },
-          // { value: 50, name: '活得好' },
-          // { value: 40, name: '活得好' },
-          // { value: 30, name: '活得好' },
-          // { value: 20, name: '活得有意义' },
-          // { value: 10, name: '活得有意义' },
-          // { value: 33.6, name: '活得有意义', itemStyle: { color: '#867A6A'}},
-          // { value: 66.6, name: '活得好', itemStyle: { color: '#B5B5A9'}},
-          // { value: 100, name: '活着', itemStyle: { color: '#D0D0CE'}},
-          // { value: 33.6, name: '活得有意义', itemStyle: { color: 'rgba(134, 122, 106, 0)', borderWidth: 1}},
-          // { value: 66.6, name: '活得好', itemStyle: { color: 'rgba(181, 181, 169, 0)', borderWidth: 1}},
-          // { value: 100, name: '活着', itemStyle: { color: 'rgba(208, 208, 206, 0)', borderWidth: 1}},
           { 
             value: 33.3,
             name: '活得有意义',
             itemStyle: {
               color: 'rgba(134, 122, 106, 0)',
               borderWidth: 1
-          }},
+            }
+          },
           { 
             value: 66.6,
             name: '活得好',
@@ -469,7 +527,7 @@ export const Sheet = () => {
         label: {
           position: 'leftBottom',
           fontWeight: 'lighter',
-          color: '#DBDBDB'
+          color: '#DBDBDB',
         },
         labelLine: {
           show: false
@@ -492,7 +550,7 @@ export const Sheet = () => {
           },
           { 
             value: 100,
-            name: '30',
+            name: '30'
           }
         ]
       },
@@ -501,50 +559,54 @@ export const Sheet = () => {
 
   // const [isEmphasis, setIsEmphasis] = useState(-1);
   const [lineChartOption, setLineChartOption] = useState<MyChartOption>({
+    name: 'linechart',
     tooltip: {
       show: true,
       trigger: 'axis',
-      position: [80, -13],
+      position: ["30%", "0"],
       padding: 0,
-      // textStyle: {
-      //   height: 4,
-      //   fontSize: 12,
-      //   color: 'rgba(255, 255, 255, 1)'
-      // },
       backgroundColor: '#1F1F1F',
       borderColor: '#1F1F1F',
       formatter: function(params: any) {
         let html = 
-        `<div style="height:auto;width:160px;display:flex;flex-flow:wrap;">
-          ${params.map(( item: { color: string; seriesName: string; value: number; } ) => 
-           `<div style="font-size:12px;color:#DBDBDB;display:flex;align-items:center;line-height:2; margin-left:8px">
-              <span style="margin-right:4px;border-radius:10px;width:10px;height:10px;background-color: ${item.color};"></span>
-              <span>${item.seriesName}</span>
-              <span style="flex:1;margin-left:4px;">${item.value}</span>
-           </div>`).join("")}
+        `<div style="height:auto;width:9rem; font-size:0.6rem; ">
+          <div style="color:#DBDBDB; height:1.2rem; display:flex;justify-content:center; align-items:center;">${params[0].axisValue}</div>
+          <div style="display:flex;flex-flow:wrap;">
+            ${params.map(( item: { color: string; seriesName: string; value: number;  } ) => 
+            `<div style="color:#DBDBDB;display:flex;align-items:center;line-height:2; margin-left:0.4rem">
+               <span style="margin-right:0.3rem;border-radius:0.5rem;width:0.5rem;height:0.5rem;background-color: ${item.color};"></span>
+               <span>${item.seriesName}</span>
+               <span style="flex:1;margin-left:0.3rem;">${item.value}</span>
+            </div>`).join("")}
+          </div>
         </div>`
         return html;
       },
     },
     legend: {
       show: true,
+      top: '5%',
       right: 0,
       width: '60%',
-      itemWidth: 10,
-      itemHeight: 10,
+      itemWidth: iconSize,
+      itemHeight: iconSize,
+      itemGap: iconGap,
       icon: 'circle',
       textStyle: {
-        color: '#DBDBDB' 
+        color: '#DBDBDB',
       },
       // selectedMode: 'multiple',
       
-      data: ['购物力', '依恋感', '安全感', '信念感', '分享欲']
+      data: ['购物力', '安全感', '分享欲', '依恋感', '信念感']
+    },
+    textStyle: {
+      fontSize: chartFontSize
     },
     grid: {
       containLabel: true,
-      left: '5%',
-      top: '32%',
-      width: '90%',
+      left: '15%',
+      top: '38%',
+      width: '85%',
       height: '52%'
     },
     // toolbox: {
@@ -560,8 +622,10 @@ export const Sheet = () => {
       boundaryGap: false,
       axisLine: {
         symbol: ['none', 'arrow'],
+        symbolSize: [iconSize, iconSize],
         lineStyle: {
-          color: '#DBDBDB'
+          color: '#DBDBDB',
+          width: lineWidth
         }
       },
       axisTick: {
@@ -574,7 +638,8 @@ export const Sheet = () => {
     },
     yAxis: {
       name: '内在价值(V)',
-      nameGap: 15,
+      nameGap: iconGap,
+      nameLocation: 'end',
       max: function (value) {
         if( value.max + 20 <= 100 )
           return value.max + 20;
@@ -591,13 +656,19 @@ export const Sheet = () => {
       axisLine: {
         show: true,
         symbol: ['none', 'arrow'],
+        symbolSize: [iconSize, iconSize],
         lineStyle: {
-          color: '#DBDBDB'
+          color: '#DBDBDB',
+          width: lineWidth
         }
       },
       axisTick: {
         show: false
-      }
+      },
+      axisLabel: {
+        show: true,
+        fontSize: chartFontSize
+      },
     },
     series: [
       {
@@ -612,21 +683,10 @@ export const Sheet = () => {
           focus: 'self',
         },
         triggerLineEvent: true,
+        lineStyle: {
+          width: lineWidth
+        },
         data: [16, 16, 16, 35, 45, 50, 45, 66, 62, 68]
-      },
-      {
-        name: '依恋感',
-        type: 'line',
-        smooth: true,
-        symbol: 'none',
-        label: {
-          show: false
-        },
-        emphasis: {
-          focus: 'self'
-        },
-        triggerLineEvent: true,
-        data: [58, 78, 76, 44, 43, 55, 55, 40, 40, 40]
       },
       {
         name: '安全感',
@@ -640,21 +700,10 @@ export const Sheet = () => {
           focus: 'self'
         },
         triggerLineEvent: true,
+        lineStyle: {
+          width: lineWidth
+        },
         data: [45, 56, 30, 46, 29, 29, 29, 35, 32, 40]
-      },
-      {
-        name: '信念感',
-        type: 'line',
-        smooth: true,
-        symbol: 'none',
-        label: {
-          show: false
-        },
-        emphasis: {
-          focus: 'self'
-        },
-        triggerLineEvent: true,
-        data: [12, 12, 12, 12, 16, 17, 13, 10, 14, 18]
       },
       {
         name: '分享欲',
@@ -668,12 +717,72 @@ export const Sheet = () => {
           focus: 'self'
         },
         triggerLineEvent: true,
+        lineStyle: {
+          width: lineWidth
+        },
         data: [72, 72, 89, 72, 72, 65, 72, 72, 55, 72]
+      },
+      {
+        name: '依恋感',
+        type: 'line',
+        smooth: true,
+        symbol: 'none',
+        label: {
+          show: false
+        },
+        emphasis: {
+          focus: 'self'
+        },
+        triggerLineEvent: true,
+        lineStyle: {
+          width: lineWidth
+        },
+        data: [58, 78, 76, 44, 43, 55, 55, 40, 40, 40]
+      },
+      {
+        name: '信念感',
+        type: 'line',
+        smooth: true,
+        symbol: 'none',
+        label: {
+          show: false
+        },
+        emphasis: {
+          focus: 'self'
+        },
+        triggerLineEvent: true,
+        lineStyle: {
+          width: lineWidth
+        },
+        data: [12, 12, 12, 12, 16, 17, 13, 10, 14, 18]
       }
     ]
   });
 
-  const { redisData } = useRedis();
+  // function changeLineChart() {
+  //   console.log("changeLineChart");
+  //   setLineChartOption(Object.assign({}, lineChartOption, { fontStyle: {fontSize: setFontSize(14)}}));
+  // }
+
+  // window.addEventListener('resize', () => changeLineChart());
+ 
+  // window.addEventListener('resize', resetFont);
+  // useEffect(() => {
+  //   console.log("chartFontChanged")
+  //   setLineChartOption(Object.assign({}, lineChartOption, {textStyle: {fontSize: chartFontSize}}));
+  // }, [chartFontSize])
+
+
+  // const { redisData } = useRedis();
+  const [redisData, setRedisData] = useState<any>(mockRedisData.data1);
+  // setTimeout(() => {
+  //   setRedisData(mockRedisData.data1);
+  // }, 5000);
+  // setTimeout(() => {
+  //   setRedisData(mockRedisData.data2);
+  // }, 8000);
+  
+
   // var timer = Number(setInterval(() => {    
   //   if (currentAttrValues.length < latestData.length) {
   //     console.log("before currentAttrValues", currentAttrValues)
@@ -702,10 +811,9 @@ export const Sheet = () => {
   //   }
   // }, 3000);
 
-  useEffect(() => {
-    // console.log("latestData", latestData)
-    console.log("currentAttrValues", currentAttrValues)
-  }, [currentAttrValues])
+  function setDatas() {
+    
+  }
 
   useEffect(() => {
     console.log("redisData", redisData)
@@ -733,7 +841,6 @@ export const Sheet = () => {
         
         // 改写attr数据（添加差值）
         let attr = redisData[index].attr_value;
-        
         let newAttr = {
           Survival: {},
           Belonging: {},
@@ -794,8 +901,7 @@ export const Sheet = () => {
       lineChartSeries.map((item: any, index: number) => {
         item.data = lineChartData[index]
       })
-      console.log("lineChartXAxis", lineChartXAxis)
-      setLineChartOption(Object.assign({}, lineChartOption, { xAxis: lineChartXAxis, series: lineChartSeries }));
+      setLineChartOption(Object.assign({}, lineChartOption, { xAxis: lineChartXAxis, series: lineChartSeries}));
       
       setHistoryEvent(historyEvent);
       // setAttrList(showingData);
@@ -866,6 +972,10 @@ export const Sheet = () => {
       vTpOption(v);
     }
   }, [redisData]);
+
+  // useEffect(() => {
+  //   console.log("lineChartOption", lineChartOption);
+  // }, [lineChartOption])
 
   // function handleHoverCardOpenChange(open: boolean) {
   //   console.log(box.current);
@@ -1053,9 +1163,8 @@ export const Sheet = () => {
     }
     currentAttrValues.push(newAttr)
     setCurrentAttrValues(currentAttrValues);
-    console.log("newAttr", newAttr);
     const response = await axios.post("http://localhost:3000/change_attr", {
-        id: '李白',
+        id: '1',
         attr: [newAttr.Survival.value, newAttr.Belonging.value, newAttr.Social.value, newAttr.Intimacy.value, newAttr.Honor.value]
     })
     console.log("response", response)
@@ -1133,32 +1242,38 @@ export const Sheet = () => {
   
   async function insertNewEvent() {
     console.log("selectedEvent", selectedEvent)
-    const response = await axios.post("http://localhost:3000/history_event", {
-        id: '李白',
-        event: selectedEvent
-    })
-    console.log("response", response)
-    setSelectedEvent("");
+    if (selectedEvent != null) {
+      const response = await axios.post("http://localhost:3000/history_event", {
+        id: '1',
+        event: selectedEvent.fullcontent
+      })
+      console.log("response", response)
+      setSelectedEvent(null);
+    }
   }
 
   function linesClickEvent(event: any) {
     console.log("event", event)
     event.event.stop("click")
-    const newseries = JSON.parse(JSON.stringify(lineChartOption.series));
-    newseries.map((item: any, index: any) => {
-      if(index == event.seriesIndex) {
+    // const newseries = JSON.parse(JSON.stringify(lineChartOption.series));
+    const newseries = lineChartOption.series as LineSeriesOption[];
+    newseries.map((item: LineSeriesOption, index: number) => {
+      if( item.label && index == event.seriesIndex ) {
         item.label.show = true;
       }
-      else {
+      else if (item.label) {
         item.label.show = false;
       }
     })
     setLineChartOption(Object.assign({}, lineChartOption, { series: newseries }));
   }
   function cancelLabel() {
-    const newseries = JSON.parse(JSON.stringify(lineChartOption.series));
-    newseries.map((item: any) => {
-        item.label.show = false;
+    // const newseries = JSON.parse(JSON.stringify(lineChartOption.series));
+    const newseries = lineChartOption.series as LineSeriesOption[];
+    newseries.map((item: LineSeriesOption) => {
+        if (item.label) {
+          item.label.show = false;
+        }
     })
     setLineChartOption(Object.assign({}, lineChartOption, { series: newseries }));
   }
@@ -1178,23 +1293,24 @@ export const Sheet = () => {
         <Button
           onClick={() => setIsDisplay(!isDisplay)}
           variant="ghost"
-          className="mt-6 hover:bg-transparent"
+          className="mt-5 hover:bg-transparent absolute"
         >
-          <ChevronLeft
+          {/* <ChevronLeft
             className="transition-all duration-500 text-white"
-            style={{ rotate: isDisplay ? "180deg" : "" }}
-          />
+            style={{ rotate: isDisplay ? "180deg" : ""}}
+          /> */}
+          <img src="/UI_left.png" className="w-[0.8rem]" style={{ rotate: isDisplay ? "180deg" : ""}} />
         </Button>
         {isDisplay && (
-          <div className="flex flex-col h-full py-2 text-white">
-            <div className="my-4 -ml-8 text-2xl font-semibold tracking-wider flex">
+          <div className="ml-[0.5vw] w-[25vw] flex flex-col h-full py-2 text-white">
+            <div className="mt-[2.5%] h-[5%] flex items-center text-2xl font-semibold tracking-wider flex">
               CURRENT AGENT INFO
             </div>
             
-            <div className="w-[24.5vw] h-[34vh] -ml-10 p-2 px-3 bg-[#1F1F1FB2] rounded-3xl relative">
+            <div className="w-full h-[43%] p-2 px-3 bg-[#1F1F1FB2] rounded-3xl relative">
               <div className="w-full h-[15%] flex justify-between items-center mb-2">
                 <div
-                  className="my-2 pl-4 text-2xl font-semibold"
+                  className="my-2 pl-4 text-xl font-semibold"
                   style={{ letterSpacing: "0.625rem" }}
                 >
                   李白
@@ -1203,74 +1319,73 @@ export const Sheet = () => {
 
 
               <div className="flex w-full h-[80%]">
-                <div className="w-[10vw] h-full relative">
-                  <div className="flex justify-between items-center mb-2">
-                  <div
-                    className="h-[15%] my-1 pl-4 text-xl"
-                    style={{ letterSpacing: "0.625rem" }}
-                  >
-                    事件
-                  </div>
-                </div>
-                {/* <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">{redisData.length ? redisData[0].name : ""}</div> */}
-                <div className="flex flex-col h-[77%] gap-y-3 pl-3 "> 
-                  <div className="flex items-center justify-between h-[15%]">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="w-[75%] h-full text-[0.8rem] flex jusify-between border border-[#F5EFEF] opacity-50 p-px rounded ">
-                        <div className="w-[80%] flex jusify-between gap-x-2">
-                          <img className="w-[20%] ml-1" src="/UI_insert.png" />
-                          <div className="w-[80%] truncate"> {selectedEvent != "" ? selectedEvent:"选择输入事件"}</div>
-                        </div>
-                        <img src="/UI_down.png" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuPortal>
-                        <DropdownMenuContent align="start" className="bg-[#262526] w-[125%] h-24 mt-1 text-[0.8rem] rounded border border-[#C3C3C3] animate-slideDownAndFade overflow-auto">
-                          {selectEventList.map((item) => (
-                            <DropdownMenuItem
-                              className="h-9 text-[#D9D2D2] hover:bg-[#C3C3C3] hover:text-[#333333] justify-start items-center pl-2"
-                              key={item.name}
-                              onClick={() => setSelectedEvent(item.name)}
-                            >
-                              {item.name}
-                            </DropdownMenuItem>
-                            
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenuPortal>
-                    </DropdownMenu>
-                    <Button className="w-[20%] h-full rounded text-[0.7rem] bg-[#F4F1F1]" onClick={() => insertNewEvent()}>确定</Button>
-                  </div>
-              
-                  {/* <div className="flex h-1/6 bg-white gap-x-4">
-                  </div> */}
-                  <div className="h-[80%]">
-                    <div className="w-full h-1/4 flex items-center gap-x-4 text-[#D9D2D2] text-md font-semibold border-y border-[#C9C9C9]">
-                      <div className="w-[30%] pl-2">帧</div>
-                      <div className="w-[70%]">历史事件</div>
+                <div className="w-[40%] h-full relative">
+                  <div className="h-[15%] flex justify-between items-center mb-2">
+                    <div
+                      className="my-1 pl-4 text-l"
+                      style={{ letterSpacing: "0.625rem" }}
+                    >
+                      事件
                     </div>
-                    <div ref={clickItemRef} className="w-full h-3/4 gap-x-4 border-b border-[#C9C9C9] overflow-y-scroll">
-                    {historyEvent.map((event, index) => (
-                      <HoverCard openDelay={400} closeDelay={100}>
-                        <HoverCardTrigger className="cursor-pointer" >
-                          <div
-                            key={event.frame}
-                            className={`${ index == isClicking ? 'text-[#D1CDAC]' : 'text-[#B6B0B0]' } w-[96%] h-1/3 flex items-center gap-x-4 text-md border-b border-[#606060] hover:text-[#D1CDAC] text-sm`}
-                            onClick={() => clickHistoryEvent(index)}
-                          >
-                            <div className="w-[30%] pl-2">{event.frame}</div>
-                            <div className="w-[70%] truncate">{event.name}</div>
+                  </div>
+                  {/* <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">{redisData.length ? redisData[0].name : ""}</div> */}
+                  <div className="flex flex-col h-[85%] pl-3 "> 
+                    <div className="flex items-center justify-between h-[13%]">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className="w-[75%] h-full text-[0.6rem] flex jusify-between border border-[#F5EFEF] opacity-50 p-px rounded ">
+                          <div className="w-[80%] flex jusify-between gap-x-2">
+                            <img className="w-[20%] ml-1" src="/UI_insert.png" />
+                            <div className="w-[80%] truncate"> {selectedEvent != null ? selectedEvent.name:"选择输入事件"}</div>
                           </div>
-                        </HoverCardTrigger>
-                        <HoverCardContent className="z-50 w-full h-1/3 bg-[#DBDBDB] text-[#262623] text-sm">{event.name}</HoverCardContent>
-                      </HoverCard>
-                      
-                    ))}
+                          <img src="/UI_down.png" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuPortal>
+                          <DropdownMenuContent align="start" className="bg-[#262526] w-[125%] h-24 mt-1 text-[0.6rem] rounded border border-[#C3C3C3] animate-slideDownAndFade overflow-auto">
+                            {selectEventList.map((item) => (
+                              <DropdownMenuItem
+                                className="h-9 text-[#D9D2D2] hover:bg-[#C3C3C3] hover:text-[#333333] justify-start items-center pl-2"
+                                key={item.name}
+                                onClick={() => setSelectedEvent(item)}
+                              >
+                                {item.name}
+                              </DropdownMenuItem>
+                              
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenuPortal>
+                      </DropdownMenu>
+                      <Button className="w-[20%] h-full rounded text-[0.6rem] bg-[#F4F1F1]" onClick={() => insertNewEvent()}>确定</Button>
+                    </div>
+              
+                    {/* <div className="flex h-1/6 bg-white gap-x-4">
+                    </div> */}
+                    <div className="h-[72%] mt-[7%]">
+                      <div className="w-full h-1/4 flex items-center gap-x-4 text-[#D9D2D2] text-sm font-semibold border-y border-[#C9C9C9]">
+                        <div className="w-[30%] pl-2">帧</div>
+                        <div className="w-[70%]">历史事件</div>
+                      </div>
+                      <div ref={clickItemRef} className="w-full h-3/4 gap-x-4 border-b border-[#C9C9C9] overflow-y-scroll">
+                      {historyEvent.map((event, index) => (
+                        <HoverCard openDelay={400} closeDelay={100}>
+                          <HoverCardTrigger className="cursor-pointer" >
+                            <div
+                              key={event.frame}
+                              className={`${ index == isClicking ? 'text-[#D1CDAC]' : 'text-[#B6B0B0]' } w-[96%] h-1/3 flex items-center gap-x-4 text-md border-b border-[#606060] hover:text-[#D1CDAC] text-xs`}
+                              onClick={() => clickHistoryEvent(index)}
+                            >
+                              <div className="w-[30%] pl-2">{event.frame}</div>
+                              <div className="w-[70%] truncate">{event.name}</div>
+                            </div>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="z-50 w-full h-1/3 bg-[#DBDBDB] text-[#262623] text-sm">{event.name}</HoverCardContent>
+                        </HoverCard>
+                        
+                      ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-
-                </div>
-                <div className="w-[12vw] h-full relative ml-6">
+                <div className="w-[55%] h-full relative ml-[5%]">
                   {/* <HoverCard openDelay={50} onOpenChange={handleHoverCardOpenChange}>
                     <HoverCardTrigger asChild className="absolute top-6 right-10">
                       <HelpCircle />
@@ -1289,31 +1404,31 @@ export const Sheet = () => {
                   
                   {/* <div className="w-[50%] p-1 mx-auto text-lg text-center font-semibold bg-[#5E5840]/90">{redisData.length ? redisData[0].name : ""}</div> */}
                   
-                  <div className="w-full h-[15%] flex justify-between items-center pl-4 pr-8" onClick={ e => e.stopPropagation()}>
-                    <div className="pr-5 text-xl">
+                  <div className="w-[80%] h-[15%] pl-[2%] flex justify-between items-center" onClick={ e => e.stopPropagation()}>
+                    <div className="pr-5 text-l flex justify-center items-center">
                       { isClicking == -1 ? "实时数值" : "历史数值" }
                     </div>
                     <img 
                       src="/UI_edit.png"
-                      className="cursor-pointer"
+                      className="cursor-pointer w-[1.2rem]"
                       style={{ display: isEditing ? "none" : "block" }}
                       onClick={() => { handleEdit() }}
                       alt=""
                     />
-                    <div className=" justify-end gap-x-3 items-center" style={{ display: isEditing ? "flex" : "none" }}>
-                      <img className="cursor-pointer" src="/UI_confirm.png" onClick={() => handleConfirm()} alt="" />
-                      <img className="cursor-pointer" src="/UI_cancel.png" onClick={() => handleCancel()} alt="" />
+                    <div className="justify-end gap-x-3 items-center" style={{ display: isEditing ? "flex" : "none" }}>
+                      <img className="cursor-pointer w-[0.8rem]" src="/UI_confirm.png" onClick={() => handleConfirm()} alt="" />
+                      <img className="cursor-pointer w-[0.8rem]" src="/UI_cancel.png" onClick={() => handleCancel()} alt="" />
                     </div>
                   </div> 
 
-                  <div className="flex flex-col justify-between h-[77%] gap-y-3 pl-3 mt-2" ref={showingAttrRef} onClick={ e => e.stopPropagation() }>
+                  <div className="flex flex-col justify-between h-[77%] gap-y-3 mt-2" ref={showingAttrRef} onClick={ e => e.stopPropagation() }>
                     {infos.map((info) => {
                       let showingAttr = isClicking >= 0 ? historyEvent[isClicking].attr_value![info.label] : currentAttrValues[currentAttrValues.length - 1]![info.label];
                       return (
                         <div key={info.label} className="flex items-center ">
-                          <div className="flex items-center gap-x-2 w-26">
-                            <info.icon className="w-5 h-5" />
-                            <span className="text-l w-10">
+                          <div className="flex justify-between items-center w-[30%] mr-[5%]">
+                            <info.icon className="w-[30%] h-5" />
+                            <span className="w-[55%] text-sm">
                               {info.name}
                             </span>
                           </div>
@@ -1321,10 +1436,10 @@ export const Sheet = () => {
                             value={showingAttr.value}
                             // value={isClicking >= 0 ? currentData[isClicking].attr_value![info.label] : currentAttrValues![info.label]}
                             // value={currentAttrValues![info.label]}
-                            className="w-24 mr-2 transition-all duration-200"
+                            className="w-[30%] mr-[5%] transition-all duration-200"
                           />
                           <div
-                            className="w-8 h-6 px-1 text-l justify-center items-center bg-transparent border border-[#F4F1F1] border-opacity-0"
+                            className="w-[15%] h-[1.5rem] px-1 text-sm justify-center items-center bg-transparent border border-[#F4F1F1] border-opacity-0"
                             style={{ display: isEditing ? "none" : "flex"}}
                           >
                             {showingAttr.value}
@@ -1332,7 +1447,7 @@ export const Sheet = () => {
                             {/* {currentAttrValues![info.label]} */}
                           </div>
                           <div
-                            className="w-8 h-6 px-1 text-l flex justify-center items-center bg-transparent border  border-[#F4F1F1] rounded"
+                            className="w-[15%] h-[1.5rem] px-1 text-sm flex justify-center items-center bg-transparent border  border-[#F4F1F1] rounded"
                             style={{ display: isEditing ? "flex" : "none"}}
                             ref={node => { attrNodes[info.label] = node }}
                             contentEditable
@@ -1341,10 +1456,10 @@ export const Sheet = () => {
                             {editingAttrValues[info.label].value}
                           </div>
                           <div
-                            className="w-8 h-6  flex justify-center items-center text-xs"
+                            className="w-[8%] h-[1.5rem]  flex justify-between items-center text-xs"
                             style={{ opacity: !isEditing && showingAttr.diff != 0 ? 1 : 0 }}
                           >
-                            <img src={'/UI_' + `${isClicking >= 0 ? showingAttr.trend : showingAttr.trend}`+ '.png'  } alt="" />
+                            <img className="w-[0.5rem]" src={'/UI_' + `${isClicking >= 0 ? showingAttr.trend : showingAttr.trend}`+ '.png'  } alt="" />
                             {isClicking >= 0 ? showingAttr.diff : showingAttr.diff}
                           </div>
                         </div>
@@ -1358,19 +1473,19 @@ export const Sheet = () => {
             
 
 
-            <div className="mt-10 mb-4 -ml-8 text-2xl font-semibold tracking-wider">
+            <div className="mt-[5%] h-[5%] flex items-center text-2xl font-semibold tracking-wider">
               DATA ANALYSIS
             </div>
-            <div className="relative w-[24.5vw] h-[32vh] py-4 -ml-10 px-2 flex justify-between items-center bg-[#1F1F1FB2] rounded-3xl">
-              <div className="w-[45%] h-full ml-2 flex flex-col items-center gap-y-3">
-                <p className="text-xl font-semibold">内在价值状态</p>
+            <div className="relative w-full h-[42%] py-4 px-2 flex justify-between items-center bg-[#1F1F1FB2] rounded-3xl">
+              <div className="w-[10vw] h-full ml-[1vw] flex flex-col items-center">
+                <p className="h-[10%] flex items-center text-base font-semibold">内在价值状态</p>
                 {/* <UVBar UV={UV} /> */}
-                <MyChart option={funnelChartOption} width="100%" height="90%" ></MyChart>
+                <MyChart option={funnelChartOption} width="90%" height="90%" ></MyChart>
               </div>
-              <div className="w-[50%] h-full mr-4 flex flex-col items-center gap-y-6" onClick={() => cancelLabel()}>
-                <p className="text-xl font-semibold">历史属性状态</p>
+              <div className="w-[13vw] h-full mr-[1vw] flex flex-col items-center" onClick={() => cancelLabel()}>
+                <p className="h-[10%] flex items-center text-base font-semibold">历史属性状态</p>
                 {/* <RoseGraph isDisplay /> */}
-                <MyChart option={lineChartOption} width="100%" height="95%" onClick={e =>linesClickEvent(e)}></MyChart>
+                <MyChart option={lineChartOption} width="90%" height="95%" onClick={e =>linesClickEvent(e)}></MyChart>
               </div>
             </div>
           </div>

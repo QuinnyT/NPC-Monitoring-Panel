@@ -25,7 +25,8 @@ import {UniversalTransition} from 'echarts/features';
 import {SVGRenderer} from 'echarts/renderers';
 
 
-import {ECElementEvent} from 'echarts/types/dist/shared.js';
+import {ECElementEvent, TooltipOption, XAXisOption, YAXisOption} from 'echarts/types/dist/shared.js';
+import {newChartSize} from "@/hooks/use-set-size";
 
 echarts.use([
   DatasetComponent,
@@ -74,6 +75,8 @@ export interface MyChartRef {
   instance(): EChartsType | undefined;
 }
 
+
+
 const MyChartInner: React.ForwardRefRenderFunction<MyChartRef, MyChartProps> = ({option, width, height, loading = false, onMouseOver, onClick}, ref: ForwardedRef<MyChartRef>) => {
   const cRef = useRef<HTMLDivElement>(null);
   const cInstance = useRef<EChartsType>();
@@ -100,7 +103,8 @@ const MyChartInner: React.ForwardRefRenderFunction<MyChartRef, MyChartProps> = (
         });
       }
       // 设置配置项
-      if (option) cInstance.current?.setOption(option, true);
+      // if (option) cInstance.current?.setOption(option, true);
+      if (option) cInstance.current?.setOption(Object.assign({}, option, {textStyle: {fontSize: newChartSize(12)}}), true);
 
       // 绑定鼠标点击事件
       cInstance.current.on('mouseover', (event: ECElementEvent) => {
@@ -115,16 +119,16 @@ const MyChartInner: React.ForwardRefRenderFunction<MyChartRef, MyChartProps> = (
   }, [cRef, option]);
   
   // 监听窗口大小变化重绘
-   useEffect(() => {
-  window.addEventListener('resize', resize);
-  return () => {
-    window.removeEventListener('resize', resize);
-  };
+  useEffect(() => {
+    window.addEventListener('resize', resize);
+    return () => {
+      window.removeEventListener('resize', resize);
+    };
   }, [option]);
 
   // 监听高度变化
   useLayoutEffect(() => {
-  resize();
+    resize();
   }, [width, height]);
   
   // 重新适配大小并开启过渡动画
@@ -132,7 +136,66 @@ const MyChartInner: React.ForwardRefRenderFunction<MyChartRef, MyChartProps> = (
     cInstance.current?.resize({
       animation: {duration: 300}
     });
-}
+    resetSize();
+  }
+
+  // 重新设置图形和文字尺寸
+  const resetSize = () => {
+    if (option) {
+      
+      if(option.name == "funnelchart") {
+        const tooltip = option.tooltip as TooltipComponentOption;
+        if( tooltip.textStyle ) {
+          tooltip.textStyle.fontSize = newChartSize(12);
+        }
+        cInstance.current?.setOption(Object.assign({}, option, {textStyle: {fontSize: newChartSize(12)}, tooltip: tooltip}));
+      }
+      
+      if(option.name == "linechart") {
+        const xAxis = option.xAxis as XAXisOption;
+        const yAxis = option.yAxis as YAXisOption;
+        if( xAxis.axisLine && xAxis.axisLabel) {
+          const axisLine = xAxis.axisLine;
+          if(axisLine) {
+            axisLine.symbolSize = [newChartSize(8), newChartSize(10)];
+            const lineStyle = axisLine.lineStyle;
+            if(lineStyle) {
+              lineStyle.width = newChartSize(2);
+            }
+          }
+        }
+        if( yAxis.axisLine && yAxis.axisLabel ) {
+          yAxis.nameGap = newChartSize(15);
+          const axisLine = yAxis.axisLine;
+          const axisLabel = yAxis.axisLabel;
+          if(axisLine) {
+            axisLine.symbolSize = [newChartSize(8), newChartSize(10)];
+            const lineStyle = axisLine.lineStyle;
+            if(lineStyle) {
+              lineStyle.width = newChartSize(2);
+            }
+          }
+          if(axisLabel) {
+            axisLabel.fontSize = newChartSize(12);
+          }
+        }
+
+        const legend = option.legend as LegendComponentOption;
+        legend.itemWidth = newChartSize(12);
+        legend.itemHeight = newChartSize(12);
+        legend.itemGap = newChartSize(15);
+
+        const series = option.series as LineSeriesOption[];
+        series.map((item: LineSeriesOption) => {
+          if(item.lineStyle) {
+            item.lineStyle.width = newChartSize(2);
+          }
+        })
+        cInstance.current?.setOption(Object.assign({}, option, {textStyle: {fontSize: newChartSize(12)}, xAxis: xAxis, yAxis: yAxis, legend: legend, series: series}));
+      }
+    }
+  }
+
 
 // 展示加载中
 useEffect(() => {
