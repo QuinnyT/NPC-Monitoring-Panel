@@ -2,15 +2,22 @@ import { PixelStreamingWrapper } from "@/pages/ue/components/pixel-streaming-wra
 import { Button } from "@/components/ui/button";
 import { useCallback } from "react";
 import { createBWYInstanceApi, createUEInstanceApi } from '@/lib/api';
+import { useNavigate } from "react-router-dom"
 
 export default function UEPage() {
-
-  const handleBakeHome = useCallback(async () => {
+  const destroy =  useCallback(async () => {
     const data2 = await createUEInstanceApi({ msg: 'destroy' })
-    console.log(data2);
+    console.log("data2", data2);
     const data1 = await createBWYInstanceApi({ msg: 'destroy' })
-    console.log(data1);
+    console.log("data1", data1);
   }, [])
+
+  const navigate = useNavigate();
+
+  function handleBakeHome () {
+    destroy();
+    navigate('/');
+  }
 
   return (
     <div className="h-screen flex flex-col justify-center items-center gap-y-3 p-1 bg-black overflow-hidden">

@@ -354,7 +354,9 @@ export const Sheet = () => {
   //     action: ""
   //   }
   // ])
-  const [currentData, setCurrentData] = useState<NewRedisData[]>([
+
+  // 当前数值，后期应接入后端数据
+  const [currentData, setCurrentData] = useState<NewRedisData>(
     {
       name: "",
       game_info: {
@@ -362,13 +364,13 @@ export const Sheet = () => {
         time: "",
         frame: 0
       },
-      attr_value: currentAttrValues[0],
+      attr_value: currentAttrValues[2],
       u: 0,
       v: 0,
       uv_rose: 0,
       action: ""
     }
-  ])
+  )
   
   
   const [historyEvent, setHistoryEvent] = useState<AgentEvent[]>([
@@ -431,16 +433,27 @@ export const Sheet = () => {
   const chartFontSize = newChartSize(12);
   const lineWidth = newChartSize(2);
   const iconSize = newChartSize(10);
-  const iconGap = newChartSize(15);
+  const iconGap = newChartSize(6);
+  const axisLabelGap = newChartSize(8);
   const [funnelChartOption, setFunnelChartOption] = useState<MyChartOption>({
     name: 'funnelchart',
     tooltip: {
       show: true,
+      position: 'inside',
       trigger: 'item',
-      formatter: '47',
+      padding: 0,
+      backgroundColor: '#1F1F1F',
+      // formatter: '47',
+      formatter: function() {
+        let html = 
+        `<div style="height:1.5rem; width:2rem; font-size:0.8rem; display:flex;justify-content:center; align-items:center; color:#ccc">
+          47
+        </div>`
+        return html;
+      },
       textStyle: {
-        fontSize: chartFontSize
-      }
+        fontSize: chartFontSize,
+      },
     },
     toolbox: {
       // feature: {
@@ -460,35 +473,42 @@ export const Sheet = () => {
       {
         type: 'funnel',
         left: '20%',
-        top: '5%',
+        top: '10%',
         width: '60%',
         height: '90%',
         label: {
           formatter: '{b}',
           position: 'inside',
-          color: '#fff',
-          textBorderColor: '#000',
-          textBorderWidth: 2,
+          fontSize: newChartSize(14),
+          textBorderColor: 'rgba(0, 0, 0, 0)'
         },
         labelLine: {
           show: false
         },
         emphasis: {
-          disabled: true
+          disabled: true,
+        },
+        itemStyle: {
+          borderWidth: lineWidth
         },
         sort: 'ascending',
         data: [
           { 
             value: 33.3,
             name: '活得有意义',
+            label: {
+              color: '#fff'
+            },
             itemStyle: {
-              color: 'rgba(134, 122, 106, 0)',
-              borderWidth: 1
+              color: 'rgba(134, 122, 106, 0)'
             }
           },
           { 
             value: 66.6,
             name: '活得好',
+            label: {
+              color: '#fff'
+            },
             itemStyle: {
               color: {
                 type: 'linear',
@@ -499,21 +519,22 @@ export const Sheet = () => {
                 colorStops: [{
                     offset: 0, color: 'rgba(181, 181, 169, 0)'
                 }, {
-                    offset: 0.4, color: 'rgba(181, 181, 169, 0)'
+                    offset: 0.8, color: 'rgba(181, 181, 169, 0)'
                 }, {
-                  offset: 0.4, color: 'rgba(181, 181, 169, 1)'
+                  offset: 0.8, color: 'rgba(181, 181, 169, 1)'
                 }, {
                    offset: 1, color: 'rgba(181, 181, 169, 1)'
                 }],
               },
-              borderWidth: 1
           }},
           { 
             value: 100,
             name: '活着',
+            label: {
+              color: '#4D4B4B'
+            },
             itemStyle: {
               color: 'rgba(208, 208, 206, 1)',
-              borderWidth: 1
           }},
         ]
       },
@@ -521,19 +542,26 @@ export const Sheet = () => {
         name: 'Expected',
         type: 'funnel',
         left: '20%',
-        top: '5%',
+        top: '10%',
         width: '60%',
         height: '90%',
         label: {
-          position: 'leftBottom',
+          position: 'inside',
           fontWeight: 'lighter',
-          color: '#DBDBDB',
         },
+        // labelLayout: function(params: any) {
+        //   console.log("params", params)
+        //   return {
+        //       dx: -newChartSize(params.dataIndex*8 + 8),
+        //       dy: -newChartSize(20)
+        //   }
+        // },
         labelLine: {
           show: false
         },
         itemStyle: {
-          color: 'rgba(134, 122, 106, 0)'
+          color: 'rgba(134, 122, 106, 0)',
+          borderWidth: 0
         },
         emphasis: {
           disabled: true
@@ -567,6 +595,11 @@ export const Sheet = () => {
       padding: 0,
       backgroundColor: '#1F1F1F',
       borderColor: '#1F1F1F',
+      axisPointer: {
+        lineStyle: {
+          width: lineWidth
+        }
+      },
       formatter: function(params: any) {
         let html = 
         `<div style="height:auto;width:9rem; font-size:0.6rem; ">
@@ -588,9 +621,11 @@ export const Sheet = () => {
       top: '5%',
       right: 0,
       width: '60%',
+      padding: 0,
       itemWidth: iconSize,
       itemHeight: iconSize,
       itemGap: iconGap,
+      borderWidth: 0,
       icon: 'circle',
       textStyle: {
         color: '#DBDBDB',
@@ -617,7 +652,7 @@ export const Sheet = () => {
     xAxis: {
       name: '历史属性状态',
       nameLocation: 'middle',
-      nameGap: 5,
+      nameGap: axisLabelGap,
       type: 'category',
       boundaryGap: false,
       axisLine: {
@@ -638,7 +673,7 @@ export const Sheet = () => {
     },
     yAxis: {
       name: '内在价值(V)',
-      nameGap: iconGap,
+      nameGap: axisLabelGap,
       nameLocation: 'end',
       max: function (value) {
         if( value.max + 20 <= 100 )
@@ -667,7 +702,8 @@ export const Sheet = () => {
       },
       axisLabel: {
         show: true,
-        fontSize: chartFontSize
+        fontSize: chartFontSize,
+        margin: axisLabelGap
       },
     },
     series: [
@@ -811,9 +847,6 @@ export const Sheet = () => {
   //   }
   // }, 3000);
 
-  function setDatas() {
-    
-  }
 
   useEffect(() => {
     console.log("redisData", redisData)
@@ -968,7 +1001,8 @@ export const Sheet = () => {
       //   ]
       // })
       
-      const v = transAttrToUV(currentAttrValues[0]);
+      // const v = transAttrToUV(currentAttrValues[0]);
+      const v = transAttrToUV(currentData.attr_value);
       vTpOption(v);
     }
   }, [redisData]);
@@ -1012,6 +1046,8 @@ export const Sheet = () => {
   const showingAttrRef = useRef(null);
 
   function transAttrToUV(attrValueObj: NewAttrValue) {
+    
+    console.log("attrValueObj", attrValueObj)
     var attrValue = [];
     for( let index = 0; index< Object.keys(attrValueObj).length; index++){
       let obj = attrValueObj[Object.keys(attrValueObj)[index]];
@@ -1036,6 +1072,7 @@ export const Sheet = () => {
         uvValue += 30 + (v1 - 50) * 10 / 50;
         uvValue += v2 * 20 / 100;
     }
+    console.log("uvValue", uvValue)
 
     return uvValue;
   }
@@ -1103,10 +1140,26 @@ export const Sheet = () => {
     //     item.label.show = false;
     // })
     
-    newOption.tooltip.formatter = String(v)
+    // newOption.tooltip.formatter = String(v);
+    newOption.tooltip.formatter = function() {
+      let html = 
+      `<div style="height:1.5rem; width:2rem; font-size:0.8rem; display:flex;justify-content:center; align-items:center; color:#ccc">
+        ${v}
+      </div>`
+      return html;
+    },
+
     newOption.series[0].data.map( (item: any, index: number) => {
       item.itemStyle.color = colorList[index];
     })
+    newOption.series[1].labelLayout = function(params: any) {
+      return {
+        // dx: - newChartSize(params.dataIndex * 8 + 8),
+        // dy: - newChartSize(20)
+        x: `-${params.dataIndex * 10 + 10 }%`,
+        y: '-15%'
+      }
+    }
     console.log("newOption", newOption)
     setFunnelChartOption(newOption);
   }
@@ -1282,7 +1335,7 @@ export const Sheet = () => {
     <div>
       <div
         onClick={handleClick}
-        className="absolute z-40 top-0 right-0 h-full flex items-center rounded-r-2xl overflow-x-hidden bg-[#6F6F6FCC]/50 backdrop-blur transition-all ease-in-out"
+        className="absolute z-40 top-0 right-0 h-full flex items-center rounded-r-2xl overflow-x-hidden bg-[#6F6F6F]/[.80] backdrop-blur transition-all ease-in-out"
         style={{
           width: isDisplay ? "26vw" : "3vw",
           transitionDuration: isDisplay ? "700ms" : "600ms",
@@ -1307,7 +1360,7 @@ export const Sheet = () => {
               CURRENT AGENT INFO
             </div>
             
-            <div className="w-full h-[43%] p-2 px-3 bg-[#1F1F1FB2] rounded-3xl relative">
+            <div className="w-full h-[43%] p-2 px-3 bg-[#313131]/[.9] rounded-3xl relative">
               <div className="w-full h-[15%] flex justify-between items-center mb-2">
                 <div
                   className="my-2 pl-4 text-xl font-semibold"
@@ -1333,11 +1386,11 @@ export const Sheet = () => {
                     <div className="flex items-center justify-between h-[13%]">
                       <DropdownMenu>
                         <DropdownMenuTrigger className="w-[75%] h-full text-[0.6rem] flex jusify-between border border-[#F5EFEF] opacity-50 p-px rounded ">
-                          <div className="w-[80%] flex jusify-between gap-x-2">
-                            <img className="w-[20%] ml-1" src="/UI_insert.png" />
+                          <div className="w-[80%] flex items-center">
+                            <img className="w-[15%] ml-1" src="/UI_insert.svg" />
                             <div className="w-[80%] truncate"> {selectedEvent != null ? selectedEvent.name:"选择输入事件"}</div>
                           </div>
-                          <img src="/UI_down.png" />
+                          <img className="w-[10%] mr-1" src="/UI_down.svg" />
                         </DropdownMenuTrigger>
                         <DropdownMenuPortal>
                           <DropdownMenuContent align="start" className="bg-[#262526] w-[125%] h-24 mt-1 text-[0.6rem] rounded border border-[#C3C3C3] animate-slideDownAndFade overflow-auto">
@@ -1447,7 +1500,7 @@ export const Sheet = () => {
                             {/* {currentAttrValues![info.label]} */}
                           </div>
                           <div
-                            className="w-[15%] h-[1.5rem] px-1 text-sm flex justify-center items-center bg-transparent border  border-[#F4F1F1] rounded"
+                            className="w-[15%] h-[1.5rem] px-1 text-sm flex justify-center items-center bg-transparent border border-[#F4F1F1] rounded fucus:outline-1"
                             style={{ display: isEditing ? "flex" : "none"}}
                             ref={node => { attrNodes[info.label] = node }}
                             contentEditable
@@ -1476,7 +1529,7 @@ export const Sheet = () => {
             <div className="mt-[5%] h-[5%] flex items-center text-2xl font-semibold tracking-wider">
               DATA ANALYSIS
             </div>
-            <div className="relative w-full h-[42%] py-4 px-2 flex justify-between items-center bg-[#1F1F1FB2] rounded-3xl">
+            <div className="relative w-full h-[42%] py-4 px-2 flex justify-between items-center bg-[#313131]/[.9] rounded-3xl">
               <div className="w-[10vw] h-full ml-[1vw] flex flex-col items-center">
                 <p className="h-[10%] flex items-center text-base font-semibold">内在价值状态</p>
                 {/* <UVBar UV={UV} /> */}

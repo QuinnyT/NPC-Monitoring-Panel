@@ -42,7 +42,9 @@ export const Footer = () => {
     }
   };
 
-  const handleClick = () => { }
+  const handleClick = () => {
+    navigate('city'); // 未设置条件
+  }
 
   return (
     <div className="w-full flex justify-between px-20 absolute bottom-10">

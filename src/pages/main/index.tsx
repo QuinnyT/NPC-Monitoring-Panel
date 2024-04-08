@@ -9,7 +9,7 @@ export default function MainPage() {
   const isRender = location.pathname === '/main/intro' || location.pathname === '/main/relation'
   return (
     <div className="min-h-screen relative">
-      <img src="/UI_logo.png" alt="Parametrix" className='absolute top-5 left-5' />
+      <img src="/UI_logo.png" alt="Parametrix" className='absolute top-5 left-5 w-40' />
       {isRender && <CharacterList />}
       <div className="absolute w-96 mt-60">
         <Siderbar />

@@ -19,7 +19,7 @@ export default function RelationPage() {
   return (
     <div>
       <p className="text-xl">{character.name} 的关系网</p>
-      <div className="relative top-12 flex justify-center pr-96">
+      <div className="relative left-20 top-4 flex justify-center pr-96 text-sm">
         {
           character.relateCharacter.map((data, index) => (
             <Dialog key={index}>
@@ -31,12 +31,12 @@ export default function RelationPage() {
                   }}
                 >
                   <div className="relative" style={{ rotate: `-${index * (360 / length)}deg` }}>
-                    <Avatar className="w-14 h-14 border-4 border-white" >
+                    <Avatar className="w-12 h-12 border-4 border-white" >
                       <AvatarImage src={data.avatar} />
                     </Avatar>
                     <p className="mt-1 text-center whitespace-nowrap">{data.name}</p>
                   </div>
-                  <Separator orientation="vertical" className="relative h-32">
+                  <Separator orientation="vertical" className="relative h-28">
                     <div className="absolute left-2" style={{ rotate: (index * (360 / length) > 90 && index * (360 / length) < 270) ? '180deg' : '' }}>
                       {data.relationship}
                     </div>
@@ -76,8 +76,8 @@ export default function RelationPage() {
             </Dialog>
           ))
         }
-        <div className="absolute top-[12rem] z-10 flex flex-col justify-center items-center">
-          <Avatar className="w-14 h-14 border-4 border-white" >
+        <div className="absolute top-[11rem] z-10 flex flex-col justify-center items-center">
+          <Avatar className="w-12 h-12 border-4 border-white" >
             <AvatarImage src={character.avatar} />
           </Avatar>
         </div>

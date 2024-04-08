@@ -148,13 +148,35 @@ const MyChartInner: React.ForwardRefRenderFunction<MyChartRef, MyChartProps> = (
         if( tooltip.textStyle ) {
           tooltip.textStyle.fontSize = newChartSize(12);
         }
-        cInstance.current?.setOption(Object.assign({}, option, {textStyle: {fontSize: newChartSize(12)}, tooltip: tooltip}));
+
+        const series = option.series as FunnelSeriesOption[];
+        if( series[0].itemStyle ) {
+          series[0].itemStyle.borderWidth = newChartSize(2)
+        }
+        if( series[0].label ) {
+          series[0].label.fontSize = newChartSize(14)
+        }
+        // if( series[1].label ) {
+        //   series[1].label.fontSize = newChartSize(14)
+        // }
+        // if( series[1].labelLayout ) {
+        //   series[1].labelLayout = function(params: any) {
+        //     console.log("params", params)
+        //     return {
+        //       dx: -newChartSize(params.dataIndex*8 + 8),
+        //       dy: -newChartSize(20),
+        //     }
+        //   }
+        // }
+
+        cInstance.current?.setOption(Object.assign({}, option, {textStyle: {fontSize: newChartSize(12)}, tooltip: tooltip, series: series}));
       }
       
       if(option.name == "linechart") {
         const xAxis = option.xAxis as XAXisOption;
         const yAxis = option.yAxis as YAXisOption;
         if( xAxis.axisLine && xAxis.axisLabel) {
+          xAxis.nameGap = newChartSize(8);
           const axisLine = xAxis.axisLine;
           if(axisLine) {
             axisLine.symbolSize = [newChartSize(8), newChartSize(10)];
@@ -164,26 +186,36 @@ const MyChartInner: React.ForwardRefRenderFunction<MyChartRef, MyChartProps> = (
             }
           }
         }
-        if( yAxis.axisLine && yAxis.axisLabel ) {
-          yAxis.nameGap = newChartSize(15);
+        if ( yAxis.axisLine && yAxis.axisLabel ) {
+          yAxis.nameGap = newChartSize(8);
           const axisLine = yAxis.axisLine;
           const axisLabel = yAxis.axisLabel;
-          if(axisLine) {
+          if ( axisLine ) {
             axisLine.symbolSize = [newChartSize(8), newChartSize(10)];
             const lineStyle = axisLine.lineStyle;
-            if(lineStyle) {
+            if ( lineStyle ) {
               lineStyle.width = newChartSize(2);
             }
           }
-          if(axisLabel) {
+          if ( axisLabel ) {
             axisLabel.fontSize = newChartSize(12);
+            axisLabel.margin = newChartSize(8);
+          }
+        }
+
+        const tooltip = option.tooltip as TooltipComponentOption;
+        const axisPointer = tooltip.axisPointer;
+        if ( axisPointer ) {
+          const lineStyle = axisPointer.lineStyle;
+          if ( lineStyle ) {
+            lineStyle.width = newChartSize(2);
           }
         }
 
         const legend = option.legend as LegendComponentOption;
-        legend.itemWidth = newChartSize(12);
-        legend.itemHeight = newChartSize(12);
-        legend.itemGap = newChartSize(15);
+        legend.itemWidth = newChartSize(10);
+        legend.itemHeight = newChartSize(10);
+        legend.itemGap = newChartSize(6);
 
         const series = option.series as LineSeriesOption[];
         series.map((item: LineSeriesOption) => {
@@ -191,7 +223,7 @@ const MyChartInner: React.ForwardRefRenderFunction<MyChartRef, MyChartProps> = (
             item.lineStyle.width = newChartSize(2);
           }
         })
-        cInstance.current?.setOption(Object.assign({}, option, {textStyle: {fontSize: newChartSize(12)}, xAxis: xAxis, yAxis: yAxis, legend: legend, series: series}));
+        cInstance.current?.setOption(Object.assign({}, option, {textStyle: {fontSize: newChartSize(12)}, xAxis: xAxis, yAxis: yAxis, tooltip: tooltip, legend: legend, series: series}));
       }
     }
   }

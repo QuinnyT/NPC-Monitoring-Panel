@@ -182,8 +182,9 @@ export const PixelStreamingWrapper = ({
   return (
     <div
       id="pixelStreaming"
-      className="relative w-full h-full"
-      ref={videoParent}
+      // className="relative w-full h-full"
+      // ref={videoParent}
+      className="relative w-full h-full bg-no-repeat bg-center bg-cover bg-[url('/ue_test2.png')]"
       onClick={handleClickStart}
     >
       <Sheet />
