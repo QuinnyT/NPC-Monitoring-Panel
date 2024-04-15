@@ -35,9 +35,12 @@ import { AttrValue, RedisData, useRedis } from "@/hooks/use-redis";
 import axios from "axios";
 // import { TopLevelFormatterParams } from "echarts/types/dist/shared.js";
 import { newChartSize } from "@/hooks/use-set-size";
-import mockRedisData from "@/hooks/test.json";
 import { LineSeriesOption } from "echarts/charts";
+// import { FunnelOptions } from "node_modules/@antv/g2/lib/shape/interval/funnel";
+import {FunnelSeriesOption} from 'echarts/charts';
 
+import mockRedisData from "@/hooks/test.json";
+import idNameMap from "@/lib/id-name-map.json";
 
 type Info = {
   label: string;
@@ -244,6 +247,7 @@ type AgentEvent = {
   frame: number;
   name: string;
   attr_value: NewAttrValue;
+  v: number;
 };
 export const Sheet = () => {
   
@@ -339,55 +343,42 @@ export const Sheet = () => {
     },
   ]);
 
-  // const [currentData, setCurrentData] = useState<RedisData[]>([
-  //   {
-  //     name: "",
-  //     game_info: {
-  //       day: 0,
-  //       time: "",
-  //       frame: 0
-  //     },
-  //     attr_value: currentAttrValues,
-  //     u: 0,
-  //     v: 0,
-  //     uv_rose: 0,
-  //     action: ""
-  //   }
-  // ])
-
   // 当前数值，后期应接入后端数据
-  const [currentData, setCurrentData] = useState<NewRedisData>(
-    {
-      name: "",
-      game_info: {
-        day: 0,
-        time: "",
-        frame: 0
-      },
-      attr_value: currentAttrValues[2],
-      u: 0,
-      v: 0,
-      uv_rose: 0,
-      action: ""
-    }
-  )
+  const currentData: NewRedisData = {
+    name: "",
+    game_info: {
+      day: 0,
+      time: "",
+      frame: 0
+    },
+    attr_value: currentAttrValues[1],
+    u: 0,
+    v: 0,
+    uv_rose: 0,
+    action: ""
+  }
+
   
-  
+  const [id, setId] = useState<string>("0");
+
   const [historyEvent, setHistoryEvent] = useState<AgentEvent[]>([
     {
       frame: 10,
       name: "Test1",
-      attr_value: currentAttrValues[0]
+      attr_value: currentAttrValues[0],
+      v: 18
     },
     {
       frame: 100,
       name: "Test2",
-      attr_value: currentAttrValues[1]
+      attr_value: currentAttrValues[1],
+      v: 52
     },
     {
       frame: 100,
       name: "Test2",
-      attr_value: currentAttrValues[2]
+      attr_value: currentAttrValues[2],
+      v: 64
     },
   ])
 
@@ -550,10 +541,11 @@ export const Sheet = () => {
           fontWeight: 'lighter',
         },
         // labelLayout: function(params: any) {
-        //   console.log("params", params)
         //   return {
-        //       dx: -newChartSize(params.dataIndex*8 + 8),
-        //       dy: -newChartSize(20)
+        //       // dx: -newChartSize(params.dataIndex*8 + 8),
+        //       // dy: -newChartSize(20)
+        //       x: `-${params.dataIndex * 10 + 10 }%`,
+        //       y: '-15%'
         //   }
         // },
         labelLine: {
@@ -809,8 +801,7 @@ export const Sheet = () => {
   // }, [chartFontSize])
 
 
-  // const { redisData } = useRedis();
-  const [redisData, setRedisData] = useState<any>(mockRedisData.data1);
+  // const [redisData, setRedisData] = useState<any>(mockRedisData.data1);
   // setTimeout(() => {
   //   setRedisData(mockRedisData.data1);
   // }, 5000);
@@ -848,8 +839,11 @@ export const Sheet = () => {
   // }, 3000);
 
 
+  const { redisData } = useRedis();
+  
   useEffect(() => {
     console.log("redisData", redisData)
+
     if (redisData && redisData.length > 0) {
       // setCurrentData(redisData);
       // setAttrValues(redisData[redisData.length - 1].attr_value);
@@ -857,6 +851,10 @@ export const Sheet = () => {
       //   u: redisData[redisData.length - 1].u,
       //   v: redisData[redisData.length - 1].v,
       // });
+
+    
+      setId(getKeyByValue(idNameMap, redisData[0].name) as string)
+
       setUV({
         u: redisData[redisData.length - 1].u,
         v: redisData[redisData.length - 1].v,
@@ -921,6 +919,7 @@ export const Sheet = () => {
           name: redisData[index].action,
           frame: redisData[index].game_info.frame,
           attr_value: showingData[index].attr_value,
+          v: redisData[index].v
         })
 
         // linechart 数据
@@ -1003,13 +1002,14 @@ export const Sheet = () => {
       
       // const v = transAttrToUV(currentAttrValues[0]);
       const v = transAttrToUV(currentData.attr_value);
-      vTpOption(v);
+      vToOption(v);
+      setLabelLayout();
     }
   }, [redisData]);
 
   // useEffect(() => {
-  //   console.log("lineChartOption", lineChartOption);
-  // }, [lineChartOption])
+  //   console.log("historyEvent", historyEvent);
+  // }, [historyEvent])
 
   // function handleHoverCardOpenChange(open: boolean) {
   //   console.log(box.current);
@@ -1047,7 +1047,7 @@ export const Sheet = () => {
 
   function transAttrToUV(attrValueObj: NewAttrValue) {
     
-    console.log("attrValueObj", attrValueObj)
+    // console.log("attrValueObj", attrValueObj)
     var attrValue = [];
     for( let index = 0; index< Object.keys(attrValueObj).length; index++){
       let obj = attrValueObj[Object.keys(attrValueObj)[index]];
@@ -1072,11 +1072,11 @@ export const Sheet = () => {
         uvValue += 30 + (v1 - 50) * 10 / 50;
         uvValue += v2 * 20 / 100;
     }
-    console.log("uvValue", uvValue)
+    // console.log("uvValue", uvValue)
 
     return uvValue;
   }
-  function vTpOption(v: number) {
+  function vToOption(v: number) {
     let colorList: (string | object)[] = [];
     if( v <= 30 ) {
       const offset = (30 - v) / 30;
@@ -1135,35 +1135,50 @@ export const Sheet = () => {
         }],
       }, 'rgba(181, 181, 169, 1)', 'rgba(208, 208, 206, 1)']
     }
-    const newOption = JSON.parse(JSON.stringify(funnelChartOption));
     // newseries.map((item: any) => {
     //     item.label.show = false;
     // })
-    
-    // newOption.tooltip.formatter = String(v);
-    newOption.tooltip.formatter = function() {
-      let html = 
-      `<div style="height:1.5rem; width:2rem; font-size:0.8rem; display:flex;justify-content:center; align-items:center; color:#ccc">
-        ${v}
-      </div>`
-      return html;
-    },
 
-    newOption.series[0].data.map( (item: any, index: number) => {
-      item.itemStyle.color = colorList[index];
-    })
+    const newOption = JSON.parse(JSON.stringify(funnelChartOption));
+      newOption.tooltip.formatter = function() {
+        let html = 
+        `<div style="height:1.5rem; width:2rem; font-size:0.8rem; display:flex;justify-content:center; align-items:center; color:#ccc">
+          ${v}
+        </div>`
+        return html;
+      }
+    
+      newOption.series[0].data.map( (item: any, index: number) => {
+        item.itemStyle.color = colorList[index];
+      })
+      // newOption.series[1].labelLayout = function(params: any) {
+      //   return {
+      //     // dx: - newChartSize(params.dataIndex * 8 + 8),
+      //     // dy: - newChartSize(20)
+      //     x: `-${params.dataIndex * 10 + 10 }%`,
+      //     y: '-15%'
+      //   }
+      // }
+    
+    setFunnelChartOption(newOption);
+  }
+
+  function setLabelLayout() {
+    const newOption = JSON.parse(JSON.stringify(funnelChartOption));
     newOption.series[1].labelLayout = function(params: any) {
       return {
-        // dx: - newChartSize(params.dataIndex * 8 + 8),
-        // dy: - newChartSize(20)
         x: `-${params.dataIndex * 10 + 10 }%`,
         y: '-15%'
       }
     }
-    console.log("newOption", newOption)
     setFunnelChartOption(newOption);
   }
 
+  function getKeyByValue<T extends object, V extends T[keyof T]>(obj: T, value: V): keyof T | undefined {
+    const entry = Object.entries(obj).find(([_, v]) => v === value);
+    return entry ? (entry[0] as keyof T) : undefined;
+  }
+  
 
   function handleEdit() {
     // e.stopPropagation();
@@ -1180,7 +1195,7 @@ export const Sheet = () => {
 
   function handleInput(e: FormEvent, label: string) {
     const target = e.target as HTMLInputElement;
-    let  value = target.innerText;
+    let value = target.innerText;
     value = value.replace(/[^\d]/g,'');
     const valueNum = Number(value);
     if( valueNum < 0 || valueNum > 100) {
@@ -1217,7 +1232,7 @@ export const Sheet = () => {
     currentAttrValues.push(newAttr)
     setCurrentAttrValues(currentAttrValues);
     const response = await axios.post("http://localhost:3000/change_attr", {
-        id: '1',
+        id: id,
         attr: [newAttr.Survival.value, newAttr.Belonging.value, newAttr.Social.value, newAttr.Intimacy.value, newAttr.Honor.value]
     })
     console.log("response", response)
@@ -1279,6 +1294,12 @@ export const Sheet = () => {
     if ( isEditing ) {
       handleEdit();
     }
+    if ( isClicking < 0 ) {
+      vToOption(Number(transAttrToUV(currentData.attr_value).toFixed(1)))
+    }
+    else {
+      vToOption(Number(historyEvent[isClicking].v.toFixed(1)))
+    }
   }, [isClicking])
 
  function handleClick(event: MouseEvent<HTMLDivElement>) {
@@ -1297,7 +1318,7 @@ export const Sheet = () => {
     console.log("selectedEvent", selectedEvent)
     if (selectedEvent != null) {
       const response = await axios.post("http://localhost:3000/history_event", {
-        id: '1',
+        id: id,
         event: selectedEvent.fullcontent
       })
       console.log("response", response)
@@ -1366,7 +1387,7 @@ export const Sheet = () => {
                   className="my-2 pl-4 text-xl font-semibold"
                   style={{ letterSpacing: "0.625rem" }}
                 >
-                  李白
+                  { redisData[0].name }
                 </div>
               </div>
 

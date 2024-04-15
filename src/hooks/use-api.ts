@@ -16,8 +16,10 @@ export const useApi = () => {
   );
   useEffect(() => {
     if (data) {
-      setRedisData(data.slice(data.length - 10));
-      console.log(data.slice(data.length - 10));
+      // setRedisData(data.slice(data.length - 10));
+      // console.log(data.slice(data.length - 10));
+      setRedisData(data);
+      console.log(data);
     }
   }, [data, setRedisData]);
 };

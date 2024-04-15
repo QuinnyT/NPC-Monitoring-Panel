@@ -161,10 +161,9 @@ const MyChartInner: React.ForwardRefRenderFunction<MyChartRef, MyChartProps> = (
         // }
         // if( series[1].labelLayout ) {
         //   series[1].labelLayout = function(params: any) {
-        //     console.log("params", params)
         //     return {
-        //       dx: -newChartSize(params.dataIndex*8 + 8),
-        //       dy: -newChartSize(20),
+        //       x: `-${params.dataIndex * 10 + 10 }%`,
+        //       y: '-15%'
         //     }
         //   }
         // }
