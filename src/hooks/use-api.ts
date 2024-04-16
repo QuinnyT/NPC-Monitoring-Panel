@@ -12,7 +12,8 @@ export const useApi = () => {
   const { setRedisData, targetId } = useRedis();
   let { data } = useSWR(
     `http://localhost:3000/${targetId - 10001}`,
-    getFetcher
+    getFetcher,
+    { refreshInterval: 1000 }
   );
   useEffect(() => {
     if (data) {

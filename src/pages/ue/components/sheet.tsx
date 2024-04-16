@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuPortal, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdownmenu";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/event-hover-card";
+import { Dialog, DialogContent, DialogOverlay, DialogClose } from "@/components/ui/dialog";
 
 import MyChart, { MyChartOption } from "@/components/ui/charts";
 // import {
@@ -39,7 +40,7 @@ import { LineSeriesOption } from "echarts/charts";
 // import { FunnelOptions } from "node_modules/@antv/g2/lib/shape/interval/funnel";
 import {FunnelSeriesOption} from 'echarts/charts';
 
-import mockRedisData from "@/hooks/test.json";
+import mockRedisData from "@/lib/mock-redis.json";
 import idNameMap from "@/lib/id-name-map.json";
 
 type Info = {
@@ -381,6 +382,9 @@ export const Sheet = () => {
       v: 64
     },
   ])
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const [resEventList, setResEventList] = useState<string[]>([])
 
   const [isClicking, setIsClicking] = useState<number>(-1);
 
@@ -930,6 +934,7 @@ export const Sheet = () => {
           lineChartData[keyIndex].push(attr[numberOfKeys[keyIndex]])
         }
       }
+      
       lineChartSeries.map((item: any, index: number) => {
         item.data = lineChartData[index]
       })
@@ -1313,7 +1318,7 @@ export const Sheet = () => {
       }
     }
   }
-  
+
   async function insertNewEvent() {
     console.log("selectedEvent", selectedEvent)
     if (selectedEvent != null) {
@@ -1323,8 +1328,30 @@ export const Sheet = () => {
       })
       console.log("response", response)
       setSelectedEvent(null);
+
+      setTimeout(getNewEventList, 1000);
     }
   }
+
+  async function getNewEventList() {
+    const res = await axios.get("http://localhost:3000/new_event/" + id);
+    console.log("res", res);
+    setDialogOpen(true);
+    const resEventList = res.data.split("||");
+    setResEventList(resEventList)
+  }
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    if (dialogOpen) {
+      timer = setTimeout(() => {
+        setDialogOpen(false);
+      }, 3000);
+    }
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [dialogOpen, setDialogOpen]); // 依赖于 isOpen 和 setIsOpen
 
   function linesClickEvent(event: any) {
     console.log("event", event)
@@ -1364,6 +1391,28 @@ export const Sheet = () => {
         }}
         ref={box}
       >
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="left-[50%] top-[12%] w-[30rem] text-xs border-0 bg-[#313131]/[.9]" >
+              <div>
+                <div>当前事件：</div>
+                <div className="text-[#FF8139]">- {resEventList[0]}</div>
+              </div>
+              <div>
+                <div>队列事件：</div>
+                {resEventList.map((item, index) => {
+                  const lastIndex = resEventList.length - 1;
+                  if(index > 0 && index < 4 && index < lastIndex)
+                  return (
+                    <div style={{color: index < Number(resEventList[lastIndex]) ? '#FF8139' : '#6B95FF'}}>
+                      - {item}
+                    </div>
+                  )})}
+              </div>
+          </DialogContent>
+          <DialogOverlay style={{backgroundColor: 'transparent'}}/>
+          <DialogClose onClick={() => setDialogOpen(false)}/>
+        </Dialog>
+
         <Button
           onClick={() => setIsDisplay(!isDisplay)}
           variant="ghost"
@@ -1375,6 +1424,8 @@ export const Sheet = () => {
           /> */}
           <img src="/UI_left.png" className="w-[0.8rem]" style={{ rotate: isDisplay ? "180deg" : ""}} />
         </Button>
+
+
         {isDisplay && (
           <div className="ml-[0.5vw] w-[25vw] flex flex-col h-full py-2 text-white">
             <div className="mt-[2.5%] h-[5%] flex items-center text-2xl font-semibold tracking-wider flex">

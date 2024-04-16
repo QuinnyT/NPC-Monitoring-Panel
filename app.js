@@ -26,12 +26,20 @@ const redisClient = new Redis({
   keepAlive: 1000,
 });
 
-const eventClient = new Redis({
+const insertEventClient = new Redis({
   host: "192.168.16.74",
   port: 6379,
   password: "123456",
   db: 1,
 });
+
+const newEventClient = new Redis({
+  host: "192.168.16.74",
+  port: 6379,
+  password: "123456",
+  db: 3
+});
+
 
 const attrClient = new Redis({
   host: "192.168.16.74",
@@ -56,8 +64,22 @@ app.post("/history_event", async (req, res) => {
   // console.log("req", req)
   const id = req.body.id;
   const event = req.body.event;
-  await eventClient.rpush(id, event);
-  const data = await eventClient.lrange(id, 0, -1);
+  await insertEventClient.rpush(id, event);
+  const data = await insertEventClient.lrange(id, 0, -1);
+  // console.log("history_event data", data)
+  res.json(data);
+});
+app.get("/new_event/:id", async (req, res) => {
+  const id = req.params.id;
+  console.log("id", id)
+  const data = await newEventClient.get(id);
+  // const data = [
+  //   "now doing",
+  //   "todo 1",
+  //   "todo 2",
+  //   "todo 3"
+  // ]
+  console.log("new_event", data)
   res.json(data);
 });
 
