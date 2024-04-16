@@ -935,6 +935,8 @@ export const Sheet = () => {
         }
       }
       
+      setCurrentAttrValues([...currentAttrValues, showingData[showingData.length - 1].attr_value])
+
       lineChartSeries.map((item: any, index: number) => {
         item.data = lineChartData[index]
       })
@@ -1012,9 +1014,9 @@ export const Sheet = () => {
     }
   }, [redisData]);
 
-  // useEffect(() => {
-  //   console.log("historyEvent", historyEvent);
-  // }, [historyEvent])
+  useEffect(() => {
+    console.log("currentAttrValues", currentAttrValues);
+  }, [currentAttrValues])
 
   // function handleHoverCardOpenChange(open: boolean) {
   //   console.log(box.current);
@@ -1234,8 +1236,9 @@ export const Sheet = () => {
       newAttr[key].diff = Math.abs(diff);
       newAttr[key].trend = trend;
     }
-    currentAttrValues.push(newAttr)
-    setCurrentAttrValues(currentAttrValues);
+    // currentAttrValues.push(newAttr)
+    // setCurrentAttrValues(currentAttrValues);
+    setCurrentAttrValues([...currentAttrValues, newAttr]);
     const response = await axios.post("http://localhost:3000/change_attr", {
         id: id,
         attr: [newAttr.Survival.value, newAttr.Belonging.value, newAttr.Social.value, newAttr.Intimacy.value, newAttr.Honor.value]
