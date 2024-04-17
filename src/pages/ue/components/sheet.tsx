@@ -1,5 +1,6 @@
 // eslint-disable-next-line no-redeclare
-import { useEffect, useState, useRef, MouseEvent, FormEvent } from "react";
+import * as React from 'react';
+import { useEffect, useState, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -8,6 +9,7 @@ import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/e
 import { Dialog, DialogContent, DialogOverlay, DialogClose } from "@/components/ui/dialog";
 
 import MyChart, { MyChartOption } from "@/components/ui/charts";
+import { SeriesOption } from 'echarts'
 // import {
 //   HoverCard,
 //   HoverCardContent,
@@ -94,6 +96,10 @@ const selectEventList: SelectEventList[] = [
   },
   {
     name: "buy snacks",
+    fullcontent: "buy snacks",
+  },
+  {
+    name: "buy wine",
     fullcontent: "buy wine and pay the money",
   },
   {
@@ -252,7 +258,6 @@ type AgentEvent = {
 };
 export const Sheet = () => {
   
-
   // const [currentAttrValues, setAttrValues] = useState<AttrValue>({
   //   Survival: 0,
   //   Belonging: 0,
@@ -352,7 +357,7 @@ export const Sheet = () => {
       time: "",
       frame: 0
     },
-    attr_value: currentAttrValues[1],
+    attr_value: currentAttrValues[currentAttrValues.length - 1],
     u: 0,
     v: 0,
     uv_rose: 0,
@@ -422,8 +427,11 @@ export const Sheet = () => {
       diff: 0
     },
   });
+
   // const [editingAttrValues, setEditingAttrValues] = useState<AttrValue>({...currentAttrValues}); 
   // const [showingData, setShowingAttrValues] = useState<ShowingAttrValues>({...currentAttrValues, trend: "up", diff: 0}); 
+
+  const [load, setLoad] = useState(true);  // 避免在redisData更新时，反复渲染funnelchart的labellayout
   
   const chartFontSize = newChartSize(12);
   const lineWidth = newChartSize(2);
@@ -470,7 +478,7 @@ export const Sheet = () => {
         left: '20%',
         top: '10%',
         width: '60%',
-        height: '90%',
+        height: '85%',
         label: {
           formatter: '{b}',
           position: 'inside',
@@ -539,7 +547,7 @@ export const Sheet = () => {
         left: '20%',
         top: '10%',
         width: '60%',
-        height: '90%',
+        height: '85%',
         label: {
           position: 'inside',
           fontWeight: 'lighter',
@@ -935,6 +943,7 @@ export const Sheet = () => {
         }
       }
       
+      setHistoryEvent(historyEvent);
       setCurrentAttrValues([...currentAttrValues, showingData[showingData.length - 1].attr_value])
 
       lineChartSeries.map((item: any, index: number) => {
@@ -942,7 +951,7 @@ export const Sheet = () => {
       })
       setLineChartOption(Object.assign({}, lineChartOption, { xAxis: lineChartXAxis, series: lineChartSeries}));
       
-      setHistoryEvent(historyEvent);
+      
       // setAttrList(showingData);
       // setCurrentData(showingData);
       // setAttrValues(showingData[showingData.length - 1].attr_value);
@@ -1008,14 +1017,36 @@ export const Sheet = () => {
       // })
       
       // const v = transAttrToUV(currentAttrValues[0]);
-      const v = transAttrToUV(currentData.attr_value);
-      vToOption(v);
-      setLabelLayout();
+      
+      // const v = transAttrToUV(currentData.attr_value);
+      // vToOption(v);
+      // setLabelLayout();
     }
   }, [redisData]);
 
+  const scrollToBottom = () => {
+    clickItemRef.current?.scrollTo(0, clickItemRef.current.scrollHeight);
+  };
   useEffect(() => {
-    console.log("currentAttrValues", currentAttrValues);
+    scrollToBottom();
+  }, [historyEvent]);
+
+  useEffect(() => {
+    const v = transAttrToUV(currentData.attr_value);
+    const newOption = vToOption(Number(v.toFixed(1)));
+    let timer: ReturnType<typeof setTimeout>;
+    if(load) {
+      setLabelLayout(newOption);
+      // 防止抖动，确保已经加载到
+      timer = setTimeout(() => {
+        setLoad(false);
+      }, 2000);
+    }
+    else {
+      setFunnelChartOption(newOption)
+    }
+
+    return () => clearTimeout(timer);
   }, [currentAttrValues])
 
   // function handleHoverCardOpenChange(open: boolean) {
@@ -1083,7 +1114,7 @@ export const Sheet = () => {
 
     return uvValue;
   }
-  function vToOption(v: number) {
+  function vToOption(v: number): MyChartOption {
     let colorList: (string | object)[] = [];
     if( v <= 30 ) {
       const offset = (30 - v) / 30;
@@ -1167,18 +1198,19 @@ export const Sheet = () => {
       //   }
       // }
     
-    setFunnelChartOption(newOption);
+    // setFunnelChartOption(newOption);
+    return newOption;
   }
 
-  function setLabelLayout() {
-    const newOption = JSON.parse(JSON.stringify(funnelChartOption));
-    newOption.series[1].labelLayout = function(params: any) {
+  function setLabelLayout(newOption: MyChartOption ) {
+    // const newOption = JSON.parse(JSON.stringify(funnelChartOption));
+    (newOption.series as FunnelSeriesOption[])[1].labelLayout = function(params: any) {
       return {
         x: `-${params.dataIndex * 10 + 10 }%`,
         y: '-15%'
       }
     }
-    setFunnelChartOption(newOption);
+    setFunnelChartOption({...funnelChartOption, series: newOption.series});
   }
 
   function getKeyByValue<T extends object, V extends T[keyof T]>(obj: T, value: V): keyof T | undefined {
@@ -1200,16 +1232,29 @@ export const Sheet = () => {
     setIsEditing(true);
   }
 
-  function handleInput(e: FormEvent, label: string) {
-    const target = e.target as HTMLInputElement;
-    let value = target.innerText;
-    value = value.replace(/[^\d]/g,'');
-    const valueNum = Number(value);
-    if( valueNum < 0 || valueNum > 100) {
+  function handleInput(e: React.ChangeEvent<HTMLInputElement>, label: string) {
+    // console.log("e", e)
+    // const target = e.target as HTMLInputElement;
+    // let value = target.innerText;
+    // value = value.replace(/[^\d]/g,'');
+    // const valueNum = Number(value);
+    // if( valueNum < 0 || valueNum > 100) {
+    //   return
+    // }
+    // editingAttrValues[label].value = valueNum;
+    // setEditingAttrValues(editingAttrValues);
+    
+    const value = Number(e.target.value.replace(/[^\d]/g,''));
+    if( value < 0 || value > 100) {
       return
     }
-    editingAttrValues[label].value = valueNum;
-    setEditingAttrValues(editingAttrValues);
+    setEditingAttrValues({
+      ...editingAttrValues,
+      [label]: {
+        ...editingAttrValues[label],
+        value: value
+      } 
+    }); 
   }
 
   async function handleConfirm() {
@@ -1245,6 +1290,8 @@ export const Sheet = () => {
     })
     console.log("response", response)
     setIsEditing(false);
+
+    setTimeout(getNewEventList, 1000);
     // setIsClicking(-1);
 
     // 原逻辑（修改了历史事件值）
@@ -1302,15 +1349,17 @@ export const Sheet = () => {
     if ( isEditing ) {
       handleEdit();
     }
+    let newOption;
     if ( isClicking < 0 ) {
-      vToOption(Number(transAttrToUV(currentData.attr_value).toFixed(1)))
+      newOption = vToOption(Number(transAttrToUV(currentData.attr_value).toFixed(1)))
     }
     else {
-      vToOption(Number(historyEvent[isClicking].v.toFixed(1)))
+      newOption = vToOption(Number(historyEvent[isClicking].v.toFixed(1)))
     }
+    setFunnelChartOption(newOption);
   }, [isClicking])
 
- function handleClick(event: MouseEvent<HTMLDivElement>) {
+ function handleClick(event: React.MouseEvent<HTMLDivElement>) {
     // console.log("event", event);
     event.preventDefault();
     event.stopPropagation();
@@ -1323,7 +1372,7 @@ export const Sheet = () => {
   }
 
   async function insertNewEvent() {
-    console.log("selectedEvent", selectedEvent)
+    // console.log("selectedEvent", selectedEvent)
     if (selectedEvent != null) {
       const response = await axios.post("http://localhost:3000/history_event", {
         id: id,
@@ -1349,7 +1398,7 @@ export const Sheet = () => {
     if (dialogOpen) {
       timer = setTimeout(() => {
         setDialogOpen(false);
-      }, 3000);
+      }, 5000);
     }
     return () => {
       clearTimeout(timer);
@@ -1406,7 +1455,7 @@ export const Sheet = () => {
                   const lastIndex = resEventList.length - 1;
                   if(index > 0 && index < 4 && index < lastIndex)
                   return (
-                    <div style={{color: index < Number(resEventList[lastIndex]) ? '#FF8139' : '#6B95FF'}}>
+                    <div key={index} style={{color: index < Number(resEventList[lastIndex]) ? '#FF8139' : '#6B95FF'}}>
                       - {item}
                     </div>
                   )})}
@@ -1492,9 +1541,9 @@ export const Sheet = () => {
                         <div className="w-[30%] pl-2">帧</div>
                         <div className="w-[70%]">历史事件</div>
                       </div>
-                      <div ref={clickItemRef} className="w-full h-3/4 gap-x-4 border-b border-[#C9C9C9] overflow-y-scroll">
+                      <div ref={clickItemRef} className="w-full h-3/4 gap-x-4 border-b border-[#C9C9C9] overflow-y-scroll scroll-smooth">
                       {historyEvent.map((event, index) => (
-                        <HoverCard openDelay={400} closeDelay={100}>
+                        <HoverCard key={index} openDelay={400} closeDelay={100}>
                           <HoverCardTrigger className="cursor-pointer" >
                             <div
                               key={event.frame}
@@ -1574,7 +1623,7 @@ export const Sheet = () => {
                             {/* {isClicking >= 0 ? currentData[isClicking].attr_value![info.label] : currentAttrValues![info.label]} */}
                             {/* {currentAttrValues![info.label]} */}
                           </div>
-                          <div
+                          {/* <div
                             className="w-[15%] h-[1.5rem] px-1 text-sm flex justify-center items-center bg-transparent border border-[#F4F1F1] rounded fucus:outline-1"
                             style={{ display: isEditing ? "flex" : "none"}}
                             ref={node => { attrNodes[info.label] = node }}
@@ -1582,12 +1631,20 @@ export const Sheet = () => {
                             onInput={(e) => {handleInput(e, info.label)}}
                           >
                             {editingAttrValues[info.label].value}
-                          </div>
+                          </div> */}
+                          <input
+                            className="m-0 w-[15%] h-[1.5rem] text-sm text-center bg-transparent border border-[#F4F1F1] rounded fucus:outline-1"
+                            style={{ display: isEditing ? "flex" : "none"}}
+                            ref={node => { attrNodes[info.label] = node }}
+                            onChange={(e) => {handleInput(e, info.label)}}
+                            value={editingAttrValues[info.label].value}
+                          />
+                            
                           <div
                             className="w-[8%] h-[1.5rem]  flex justify-between items-center text-xs"
                             style={{ opacity: !isEditing && showingAttr.diff != 0 ? 1 : 0 }}
                           >
-                            <img className="w-[0.5rem]" src={'/UI_' + `${isClicking >= 0 ? showingAttr.trend : showingAttr.trend}`+ '.png'  } alt="" />
+                            <img className="h-[0.38rem]" src={'/UI_' + `${isClicking >= 0 ? showingAttr.trend : showingAttr.trend}`+ '.png'  } alt="" />
                             {isClicking >= 0 ? showingAttr.diff : showingAttr.diff}
                           </div>
                         </div>

@@ -159,14 +159,14 @@ const MyChartInner: React.ForwardRefRenderFunction<MyChartRef, MyChartProps> = (
         // if( series[1].label ) {
         //   series[1].label.fontSize = newChartSize(14)
         // }
-        // if( series[1].labelLayout ) {
-        //   series[1].labelLayout = function(params: any) {
-        //     return {
-        //       x: `-${params.dataIndex * 10 + 10 }%`,
-        //       y: '-15%'
-        //     }
-        //   }
-        // }
+        if( series[1].labelLayout ) {
+          series[1].labelLayout = function(params: any) {
+            return {
+              x: `-${params.dataIndex * 10 + 10 }%`,
+              y: '-15%'
+            }
+          }
+        }
 
         cInstance.current?.setOption(Object.assign({}, option, {textStyle: {fontSize: newChartSize(12)}, tooltip: tooltip, series: series}));
       }
