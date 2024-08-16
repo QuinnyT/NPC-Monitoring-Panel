@@ -91,10 +91,6 @@ const selectEventList: SelectEventList[] = [
     fullcontent: "talk with someone",
   },
   {
-    name: "quarrel to others",
-    fullcontent: "quarreling with someone",
-  },
-  {
     name: "buy snacks",
     fullcontent: "buy snacks",
   },
@@ -813,7 +809,7 @@ export const Sheet = () => {
   // }, [chartFontSize])
 
 
-  // const [redisData, setRedisData] = useState<any>(mockRedisData.data1);
+  const [redisData, setRedisData] = useState<any>(mockRedisData.data1);
   // setTimeout(() => {
   //   setRedisData(mockRedisData.data1);
   // }, 5000);
@@ -851,7 +847,7 @@ export const Sheet = () => {
   // }, 3000);
 
 
-  const { redisData } = useRedis();
+  // const { redisData } = useRedis();
   
   useEffect(() => {
     console.log("redisData", redisData)
@@ -1032,7 +1028,9 @@ export const Sheet = () => {
   }, [historyEvent]);
 
   useEffect(() => {
-    const v = transAttrToUV(currentData.attr_value);
+    console.log("currentAttrValues", currentAttrValues)
+    // const v = transAttrToUV(currentData.attr_value);
+    const v = transAttrToUV(currentAttrValues[currentAttrValues.length - 1]);
     const newOption = vToOption(Number(v.toFixed(1)));
     let timer: ReturnType<typeof setTimeout>;
     if(load) {
@@ -1210,7 +1208,7 @@ export const Sheet = () => {
         y: '-15%'
       }
     }
-    setFunnelChartOption({...funnelChartOption, series: newOption.series});
+    setFunnelChartOption({...funnelChartOption, series: newOption.series, tooltip: newOption.tooltip});
   }
 
   function getKeyByValue<T extends object, V extends T[keyof T]>(obj: T, value: V): keyof T | undefined {
@@ -1444,7 +1442,7 @@ export const Sheet = () => {
         ref={box}
       >
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="left-[50%] top-[12%] w-[30rem] text-xs border-0 bg-[#313131]/[.9]" >
+          <DialogContent className="left-[50%] top-[12%] w-[30rem] text-xs border-0 bg-[#313131]" >
               <div>
                 <div>当前事件：</div>
                 <div className="text-[#FF8139]">- {resEventList[0]}</div>
@@ -1484,13 +1482,13 @@ export const Sheet = () => {
               CURRENT AGENT INFO
             </div>
             
-            <div className="w-full h-[43%] p-2 px-3 bg-[#313131]/[.9] rounded-3xl relative">
+            <div className="w-full h-[43%] p-2 px-3 bg-[#313131] rounded-3xl relative">
               <div className="w-full h-[15%] flex justify-between items-center mb-2">
                 <div
                   className="my-2 pl-4 text-xl font-semibold"
                   style={{ letterSpacing: "0.625rem" }}
                 >
-                  { redisData[0].name }
+                  { redisData.length > 0 ? redisData[0].name : "李白" }
                 </div>
               </div>
 
@@ -1661,7 +1659,7 @@ export const Sheet = () => {
             <div className="mt-[5%] h-[5%] flex items-center text-2xl font-semibold tracking-wider">
               DATA ANALYSIS
             </div>
-            <div className="relative w-full h-[42%] py-4 px-2 flex justify-between items-center bg-[#313131]/[.9] rounded-3xl">
+            <div className="relative w-full h-[42%] py-4 px-2 flex justify-between items-center bg-[#313131] rounded-3xl">
               <div className="w-[10vw] h-full ml-[1vw] flex flex-col items-center">
                 <p className="h-[10%] flex items-center text-base font-semibold">内在价值状态</p>
                 {/* <UVBar UV={UV} /> */}
