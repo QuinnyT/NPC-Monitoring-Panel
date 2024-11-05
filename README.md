@@ -1,4 +1,7 @@
-
+### Demo and Live Preview
+See the feature in action:
+ 
+![Feature Demo](https://github.com/QuinnyT/NPC-Monitoring-Panel/blob/quinny/public/bwy-sheet-gif.GIF)
 
 ## Getting Started
 
